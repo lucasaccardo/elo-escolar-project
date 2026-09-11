@@ -17,7 +17,7 @@
     
     <div class="container py-4" style="max-width: 800px;">
         <h1 class="mb-4 text-dark">Diário de Turma</h1>
-
+        <a href="{% url 'cadastrar_relatorio' %}" class="btn btn-primary mb-4">Publicar novo relatório</a>
         {% for relatorio in relatorios %}
             <div class="card shadow-sm mb-4 border-0">
                 
