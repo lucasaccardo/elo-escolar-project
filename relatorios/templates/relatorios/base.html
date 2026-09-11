@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}Elo Escolar{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --elo-azul: #214A78;
+            --elo-turquesa: #159A9E;
+            --elo-amarelo: #F9B518;
+            --elo-laranja: #F47772;
+        }
+
+        body {
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.78)),
+                url("{% static 'img/1.png' %}");
+            background-position: bottom center;
+            background-size: cover;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            color: #2b3440;
+        }
+
+        .topo {
+            background-color: #ffffff;
+            border-bottom: 3px solid var(--elo-turquesa);
+        }
+
+        .logo-caixa {
+            display: flex;
+            align-items: center; /* Centraliza a logo verticalmente de forma automática */
+            height: 70px; /* Dá respiro suficiente para a palavra ESCOLAR não cortar */
+            overflow: hidden;
+        }
+
+        .topo img {
+            height: 115px; /* Tamanho ajustado da imagem */
+            width: auto;
+        }
+
+        .link-diario {
+            background-color: #f0f4f8;
+            color: var(--elo-azul);
+            font-weight: 500;
+            padding: 8px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .link-diario:hover {
+            background-color: var(--elo-turquesa);
+            color: #ffffff;
+        }
+
+        h1 {
+            color: var(--elo-azul);
+            font-weight: 600;
+            font-size: 1.9rem;
+        }
+
+        .btn-elo {
+            background-color: var(--elo-azul);
+            color: #ffffff;
+        }
+
+        .btn-elo:hover {
+            background-color: #16345a;
+            color: #ffffff;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            background-color: rgba(255, 255, 255, 0.96);
+        }
+
+        .card-header {
+            border-bottom: 1px solid #e9eef3;
+        }
+
+        .rodape {
+            color: #5b6975;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="topo shadow-sm py-2">
+    <div class="container d-flex justify-content-between align-items-center" style="max-width: 900px;">
+        <a href="{% url 'lista_relatorios' %}" class="logo-caixa">
+            <img src="{% static 'img/elo-escolar-logo.png' %}" alt="Elo Escolar">
+        </a>
+        <a class="link-diario" href="{% url 'lista_relatorios' %}">Diário de turma</a>
+    </div>
+</nav>
+
+<main class="container py-4" style="max-width: 900px;">
+    {% block conteudo %}{% endblock %}
+</main>
+
+<footer class="container text-center rodape py-4" style="max-width: 900px;">
+    Elo Escolar · Engenharia de Software · UMC
+</footer>
+
+</body>
+</html>
