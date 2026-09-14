@@ -89,6 +89,14 @@
             color: #5b6975;
             font-size: 0.85rem;
         }
+
+        .form-login input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -98,7 +106,17 @@
         <a href="{% url 'lista_relatorios' %}" class="logo-caixa">
             <img src="{% static 'img/elo-escolar-logo.png' %}" alt="Elo Escolar">
         </a>
-        <a class="link-diario" href="{% url 'lista_relatorios' %}">Diário de turma</a>
+
+        {% if user.is_authenticated %}
+            <div class="d-flex align-items-center gap-3">
+                <a class="link-diario" href="{% url 'lista_relatorios' %}">Diário de turma</a>
+                <span class="text-muted small">{{ user.get_full_name|default:user.username }}</span>
+                <form method="post" action="{% url 'logout' %}" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">Sair</button>
+                </form>
+            </div>
+        {% endif %}
     </div>
 </nav>
 
