@@ -6,6 +6,19 @@
     <h1 class="mb-4">Diário de Turma</h1>
     <a href="{% url 'cadastrar_relatorio' %}" class="btn btn-elo mb-4">Publicar novo relatório</a>
     
+    <form method="get" class="d-flex gap-2 align-items-center mb-4">
+        <label for="turma" class="mb-0">Turma:</label>
+        <select name="turma" id="turma" class="form-select" style="max-width: 260px;">
+            <option value="">Todas as turmas</option>
+            {% for turma in turmas %}
+                <option value="{{ turma.id }}" {% if turma_selecionada == turma.id|stringformat:"s" %}selected{% endif %}>
+                    {{ turma.nome }}
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-elo">Filtrar</button>
+    </form>
+    
     {% for relatorio in relatorios %}
         <div class="card shadow-sm mb-4 border-0">
             
@@ -41,7 +54,11 @@
         
     {% empty %}
         <div class="alert alert-light border border-secondary text-center p-5 text-muted">
-            <p class="mb-0">Nenhum relatório publicado até o momento.</p>
+            {% if turma_selecionada %}
+                <p class="mb-0">Nenhum relatório publicado para esta turma.</p>
+            {% else %}
+                <p class="mb-0">Nenhum relatório publicado até o momento.</p>
+            {% endif %}
         </div>
     {% endfor %}
 {% endblock %}
