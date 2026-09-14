@@ -1,34 +1,46 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .models import RelatorioDiario, Turma
+from django.core.exceptions import PermissionDenied
+from .models import RelatorioDiario, Turma, Perfil
 from .forms import RelatorioDiarioForm
 
 
 @login_required
 def lista_relatorios(request):
-    # A ordenação padrão (-data_aula) já é garantida pelo class Meta do model
-    relatorios = RelatorioDiario.objects.all()
+    # Pega o perfil de quem esta logado (pode nao existir)
+    perfil = getattr(request.user, 'perfil', None)
+    eh_responsavel = perfil is not None and perfil.tipo == Perfil.Tipo.RESPONSAVEL
 
-    # Busca todas as turmas e ordena em ordem alfabética para o seletor
+    # A ordenacao padrao (-data_aula) ja vem do class Meta do model
+    relatorios = RelatorioDiario.objects.all()
     turmas = Turma.objects.all().order_by('nome')
 
-    # Lê o parâmetro 'turma' da URL 
-    turma_id = request.GET.get('turma')
+    # O responsavel so enxerga as turmas dos filhos dele
+    if eh_responsavel:
+        turmas_dos_filhos = perfil.alunos.values_list('turma_id', flat=True)
+        relatorios = relatorios.filter(turma_id__in=turmas_dos_filhos)
+        turmas = turmas.filter(id__in=turmas_dos_filhos)
 
-    # Se vier uma turma selecionada, aplica o filtro na consulta
+    # Filtro opcional escolhido na tela
+    turma_id = request.GET.get('turma')
     if turma_id:
         relatorios = relatorios.filter(turma_id=turma_id)
 
-    # Renderiza o template passando o contexto completo
     return render(request, 'relatorios/lista_relatorios.html', {
         'relatorios': relatorios,
         'turmas': turmas,
         'turma_selecionada': turma_id,
+        'pode_publicar': not eh_responsavel,
     })
 
 
 @login_required
 def cadastrar_relatorio(request):
+    # Responsavel nao publica relatorio
+    perfil = getattr(request.user, 'perfil', None)
+    if perfil is None or perfil.tipo == Perfil.Tipo.RESPONSAVEL:
+        raise PermissionDenied
+
     if request.method == 'POST':
         form = RelatorioDiarioForm(request.POST)
         if form.is_valid():

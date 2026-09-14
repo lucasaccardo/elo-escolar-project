@@ -4,7 +4,9 @@
 
 {% block conteudo %}
     <h1 class="mb-4">Diário de Turma</h1>
-    <a href="{% url 'cadastrar_relatorio' %}" class="btn btn-elo mb-4">Publicar novo relatório</a>
+        {% if pode_publicar %}
+        <a href="{% url 'cadastrar_relatorio' %}" class="btn btn-elo mb-4">Publicar novo relatório</a>
+        {% endif %}
     
     <form method="get" class="d-flex gap-2 align-items-center mb-4">
         <label for="turma" class="mb-0">Turma:</label>

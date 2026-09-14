@@ -1,11 +1,9 @@
 from django.contrib import admin
-from .models import Turma, RelatorioDiario, Aluno
-
+from .models import Turma, RelatorioDiario, Aluno, Perfil
 
 @admin.register(Turma)
 class TurmaAdmin(admin.ModelAdmin):
     list_display = ('nome', 'ano_letivo', 'professor')
-
 
 @admin.register(Aluno)
 class AlunoAdmin(admin.ModelAdmin):
@@ -13,9 +11,14 @@ class AlunoAdmin(admin.ModelAdmin):
     list_filter = ('turma',)
     search_fields = ('nome_completo', 'rgm')
 
-
 @admin.register(RelatorioDiario)
 class RelatorioDiarioAdmin(admin.ModelAdmin):
     list_display = ('turma', 'data_aula', 'autor', 'publicado_em')
     list_filter = ('turma',)
     search_fields = ('conteudo', 'tarefa_descricao')
+
+@admin.register(Perfil)
+class PerfilAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'tipo', 'ativo', 'criado_em')
+    list_filter = ('tipo', 'ativo')
+    filter_horizontal = ('alunos',)
