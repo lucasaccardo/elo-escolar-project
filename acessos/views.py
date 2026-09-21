@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -68,13 +68,21 @@ def fila_aprovacao(request):
     return render(request, 'acessos/fila.html', {'pendentes': pendentes})
 
 
+# A mesma mensagem para todos os casos: pedido que não existe, de outra
+# turma ou já analisado. Assim a tela não revela qual foi o motivo.
+AVISO_INDISPONIVEL = (
+    'Não foi possível concluir: este pedido já foi analisado '
+    'ou não está disponível para você.'
+)
+
+
 def _pedido_pendente(request, pk):
     # Busca só entre os pedidos que ESTE usuário pode analisar.
-    # Pedido de outra turma responde 404: nem revela que existe.
-    return get_object_or_404(
-        solicitacoes_que_pode_analisar(request.user),
-        pk=pk,
-        status=SolicitacaoAcesso.Status.PENDENTE,
+    # Se não achar, devolve None em vez de mostrar a página de erro.
+    return (
+        solicitacoes_que_pode_analisar(request.user)
+        .filter(pk=pk, status=SolicitacaoAcesso.Status.PENDENTE)
+        .first()
     )
 
 
@@ -82,6 +90,10 @@ def _pedido_pendente(request, pk):
 @require_POST
 def aprovar_solicitacao(request, pk):
     solicitacao = _pedido_pendente(request, pk)
+    if solicitacao is None:
+        messages.error(request, AVISO_INDISPONIVEL)
+        return redirect('fila_aprovacao')
+
     usuario = solicitacao.usuario
 
     # As quatro partes da aprovação: todas ou nenhuma.
@@ -108,6 +120,10 @@ def aprovar_solicitacao(request, pk):
 @require_POST
 def recusar_solicitacao(request, pk):
     solicitacao = _pedido_pendente(request, pk)
+    if solicitacao is None:
+        messages.error(request, AVISO_INDISPONIVEL)
+        return redirect('fila_aprovacao')
+
     justificativa = request.POST.get('justificativa', '').strip()
 
     if not justificativa:
