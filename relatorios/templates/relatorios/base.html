@@ -121,6 +121,11 @@
 </nav>
 
 <main class="container py-4" style="max-width: 900px;">
+    {% for mensagem in messages %}
+        <div class="alert alert-{% if mensagem.tags == 'error' %}danger{% else %}{{ mensagem.tags }}{% endif %}">
+            {{ mensagem }}
+        </div>
+    {% endfor %}
     {% block conteudo %}{% endblock %}
 </main>
 
