@@ -21,7 +21,7 @@
                     {% csrf_token %}
 
                     <div class="mb-3">
-                        <label class="form-label" for="{{ form.username.id_for_label }}">Usuário</label>
+                        <label class="form-label" for="{{ form.username.id_for_label }}">Usuário ou e-mail</label>
                         {{ form.username }}
                     </div>
 
@@ -32,7 +32,11 @@
 
                     <button type="submit" class="btn btn-elo w-100">Entrar</button>
                 </form>
-
+                    
+                <p class="text-center small mt-3 mb-0">
+                    É responsável e ainda não tem acesso?
+                    <a href="{% url 'cadastro' %}">Cadastre-se</a>
+                </p>
             </div>
         </div>
     </div>

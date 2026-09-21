@@ -1,0 +1,55 @@
+{% extends 'relatorios/base.html' %}
+
+{% block titulo %}Cadastro do responsável - Elo Escolar{% endblock %}
+
+{% block conteudo %}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+
+                <h1 class="h4 mb-2 text-center">Cadastro do responsável</h1>
+                <p class="text-muted small text-center mb-4">
+                    Seu acesso será liberado depois que a escola confirmar o vínculo com o aluno.
+                </p>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% for campo in form %}
+                        {% if campo.name == 'aceite_termos' %}
+                            <div class="form-check mb-3">
+                                {{ campo }}
+                                <label class="form-check-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                                {% for erro in campo.errors %}
+                                    <div class="text-danger small">{{ erro }}</div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="mb-3">
+                                <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                                {{ campo }}
+                                {% if campo.help_text %}
+                                    <div class="form-text">{{ campo.help_text }}</div>
+                                {% endif %}
+                                {% for erro in campo.errors %}
+                                    <div class="text-danger small">{{ erro }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <button type="submit" class="btn btn-elo w-100">Enviar pedido de acesso</button>
+                </form>
+
+                <p class="text-center small mt-3 mb-0">
+                    Já tem acesso? <a href="{% url 'login' %}">Entrar</a>
+                </p>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
