@@ -38,3 +38,11 @@ def cadastro_responsavel(request):
 
 def cadastro_enviado(request):
     return render(request, 'acessos/cadastro_enviado.html')
+
+
+def termos_de_uso(request):
+    return render(request, 'acessos/termos.html')
+
+
+def politica_privacidade(request):
+    return render(request, 'acessos/privacidade.html')

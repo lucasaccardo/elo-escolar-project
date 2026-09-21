@@ -21,7 +21,10 @@
                         {% if campo.name == 'aceite_termos' %}
                             <div class="form-check mb-3">
                                 {{ campo }}
-                                <label class="form-check-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                                <label class="form-check-label" for="{{ campo.id_for_label }}">
+                                    Li e aceito os <a href="{% url 'termos' %}" target="_blank" rel="noopener">Termos de Uso</a>
+                                    e estou ciente da <a href="{% url 'privacidade' %}" target="_blank" rel="noopener">Política de Privacidade</a>.
+                                </label>
                                 {% for erro in campo.errors %}
                                     <div class="text-danger small">{{ erro }}</div>
                                 {% endfor %}
