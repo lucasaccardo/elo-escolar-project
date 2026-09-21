@@ -57,7 +57,6 @@ class Perfil(models.Model):
     )
     tipo = models.CharField(max_length=20, choices=Tipo.choices)
     alunos = models.ManyToManyField(Aluno, blank=True, related_name='responsaveis')
-    ativo = models.BooleanField(default=True)
     criado_em = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

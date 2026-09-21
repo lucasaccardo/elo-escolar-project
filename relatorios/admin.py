@@ -19,6 +19,6 @@ class RelatorioDiarioAdmin(admin.ModelAdmin):
 
 @admin.register(Perfil)
 class PerfilAdmin(admin.ModelAdmin):
-    list_display = ('usuario', 'tipo', 'ativo', 'criado_em')
-    list_filter = ('tipo', 'ativo')
+    list_display = ('usuario', 'tipo', 'usuario__is_active', 'criado_em')
+    list_filter = ('tipo', 'usuario__is_active')
     filter_horizontal = ('alunos',)
