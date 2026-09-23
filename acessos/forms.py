@@ -1,8 +1,11 @@
 from django import forms
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.password_validation import validate_password
 
 from relatorios.models import Aluno
+
+from .models import SolicitacaoAcesso
 
 User = get_user_model()
 
@@ -72,3 +75,44 @@ class CadastroResponsavelForm(forms.Form):
             except forms.ValidationError as erro:
                 self.add_error('senha', erro)
         return dados
+
+
+class LoginForm(AuthenticationForm):
+    error_messages = {
+        **AuthenticationForm.error_messages,
+        'invalid_login': 'Usuário ou senha inválidos.',
+    }
+
+    def clean(self):
+        # Responsável entra pelo e-mail, que foi gravado em minúsculas.
+        usuario = self.cleaned_data.get('username', '')
+        if '@' in usuario:
+            self.cleaned_data['username'] = usuario.strip().lower()
+
+        try:
+            return super().clean()
+        except forms.ValidationError:
+            mensagem = self._mensagem_conta_desligada()
+            if mensagem:
+                raise forms.ValidationError(mensagem, code='inactive')
+            raise
+
+    def _mensagem_conta_desligada(self):
+        # Só explica o motivo para quem acertou a senha. Para os outros,
+        # continua "Usuário ou senha inválidos." e ninguém descobre contas.
+        usuario = User.objects.filter(
+            username=self.cleaned_data.get('username'),
+            is_active=False,
+        ).first()
+        if usuario is None:
+            return None
+        if not usuario.check_password(self.cleaned_data.get('password')):
+            return None
+
+        pedidos = usuario.solicitacoes_acesso
+        if pedidos.filter(status=SolicitacaoAcesso.Status.PENDENTE).exists():
+            return 'Seu cadastro está aguardando a aprovação da escola.'
+        if pedidos.filter(status=SolicitacaoAcesso.Status.RECUSADA).exists():
+            return ('Seu pedido de acesso foi recusado. '
+                    'Procure a secretaria da escola.')
+        return 'Acesso desativado. Procure a secretaria da escola.'

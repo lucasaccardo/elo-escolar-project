@@ -11,11 +11,9 @@
 
                 <h1 class="h4 mb-4 text-center">Acessar o sistema</h1>
 
-                {% if form.errors %}
-                    <div class="alert alert-danger">
-                        Usuário ou senha inválidos.
-                    </div>
-                {% endif %}
+                {% for erro in form.non_field_errors %}
+                    <div class="alert alert-danger">{{ erro }}</div>
+                {% endfor %}
 
                 <form method="post" class="form-login">
                     {% csrf_token %}

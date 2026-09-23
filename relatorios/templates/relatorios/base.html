@@ -110,6 +110,16 @@
         {% if user.is_authenticated %}
             <div class="d-flex align-items-center gap-3">
                 <a class="link-diario" href="{% url 'lista_relatorios' %}">Diário de turma</a>
+                
+                {% if mostrar_pedidos %}
+                    <a class="link-diario" href="{% url 'fila_aprovacao' %}">
+                        Pedidos de acesso
+                        {% if pedidos_pendentes %}
+                            <span class="badge rounded-pill text-bg-warning">{{ pedidos_pendentes }}</span>
+                        {% endif %}
+                    </a>
+                {% endif %}
+                
                 <span class="text-muted small">{{ user.get_full_name|default:user.username }}</span>
                 <form method="post" action="{% url 'logout' %}" class="m-0">
                     {% csrf_token %}
@@ -126,6 +136,7 @@
             {{ mensagem }}
         </div>
     {% endfor %}
+    
     {% block conteudo %}{% endblock %}
 </main>
 
