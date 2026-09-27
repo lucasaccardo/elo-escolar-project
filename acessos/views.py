@@ -7,6 +7,8 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from auditoria.models import Evento
+from auditoria.services import registrar
 from relatorios.models import Perfil
 
 from .forms import CadastroResponsavelForm
@@ -112,6 +114,12 @@ def aprovar_solicitacao(request, pk):
         solicitacao.analisado_em = timezone.now()
         solicitacao.save()
 
+        registrar(
+            Evento.Acao.ACESSO_APROVADO,
+            usuario=request.user,
+            detalhe=f'{usuario.username} / aluno {solicitacao.aluno.rgm}',
+        )
+
     messages.success(request, f'Acesso de {usuario.get_full_name()} aprovado.')
     return redirect('fila_aprovacao')
 
@@ -135,6 +143,12 @@ def recusar_solicitacao(request, pk):
     solicitacao.analisado_em = timezone.now()
     solicitacao.justificativa = justificativa
     solicitacao.save()
+
+    registrar(
+        Evento.Acao.ACESSO_RECUSADO,
+        usuario=request.user,
+        detalhe=f'{solicitacao.usuario.username} / {justificativa}',
+    )
 
     nome = solicitacao.usuario.get_full_name()
     messages.success(request, f'Pedido de {nome} recusado.')

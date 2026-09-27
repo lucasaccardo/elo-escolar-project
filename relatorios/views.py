@@ -2,6 +2,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render
 
+from auditoria.models import Evento
+from auditoria.services import registrar
+
 from .forms import RelatorioDiarioForm
 from .models import RelatorioDiario
 from .permissions import pode_publicar_relatorio, turmas_visiveis
@@ -40,6 +43,11 @@ def cadastrar_relatorio(request):
         relatorio = form.save(commit=False)
         relatorio.autor = request.user
         relatorio.save()
+        registrar(
+            Evento.Acao.RELATORIO_PUBLICADO,
+            usuario=request.user,
+            detalhe=f'{relatorio.turma} / aula de {relatorio.data_aula}',
+        )
         return redirect('lista_relatorios')
 
     return render(request, 'relatorios/cadastrar_relatorio.html', {'form': form})
