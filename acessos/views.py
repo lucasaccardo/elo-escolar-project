@@ -13,6 +13,7 @@ from relatorios.models import Perfil
 
 from .forms import CadastroResponsavelForm
 from .models import SolicitacaoAcesso
+from .notificacoes import enviar_email
 from .permissions import pode_aprovar_acessos, solicitacoes_que_pode_analisar
 
 User = get_user_model()
@@ -88,6 +89,23 @@ def _pedido_pendente(request, pk):
     )
 
 
+def _avisar_por_email(request, usuario, assunto, texto):
+    # Chama a API e registra no log se o aviso saiu ou não.
+    deu_certo, detalhe = enviar_email(
+        usuario.email, usuario.get_full_name(), assunto, texto,
+    )
+    registrar(
+        Evento.Acao.EMAIL,
+        usuario=request.user,
+        detalhe=f'{usuario.email} / {"enviado" if deu_certo else detalhe}',
+    )
+    if not deu_certo:
+        messages.error(
+            request,
+            'A decisão foi salva, mas o aviso por e-mail não saiu.',
+        )
+
+
 @login_required
 @require_POST
 def aprovar_solicitacao(request, pk):
@@ -120,6 +138,15 @@ def aprovar_solicitacao(request, pk):
             detalhe=f'{usuario.username} / aluno {solicitacao.aluno.rgm}',
         )
 
+    _avisar_por_email(
+        request,
+        usuario,
+        'Seu acesso ao Elo Escolar foi liberado',
+        f'Olá, {usuario.first_name}. A escola confirmou o seu vínculo e o '
+        f'seu acesso foi liberado. Entre com o seu e-mail e a senha que '
+        f'você criou no cadastro.',
+    )
+
     messages.success(request, f'Acesso de {usuario.get_full_name()} aprovado.')
     return redirect('fila_aprovacao')
 
@@ -148,6 +175,15 @@ def recusar_solicitacao(request, pk):
         Evento.Acao.ACESSO_RECUSADO,
         usuario=request.user,
         detalhe=f'{solicitacao.usuario.username} / {justificativa}',
+    )
+
+    _avisar_por_email(
+        request,
+        solicitacao.usuario,
+        'Sobre o seu pedido de acesso ao Elo Escolar',
+        f'Olá, {solicitacao.usuario.first_name}. O seu pedido de acesso não '
+        f'pôde ser aprovado. Motivo informado pela escola: {justificativa}. '
+        f'Em caso de dúvida, procure a secretaria.',
     )
 
     nome = solicitacao.usuario.get_full_name()

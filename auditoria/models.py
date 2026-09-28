@@ -10,6 +10,7 @@ class Evento(models.Model):
         ACESSO_APROVADO = 'ACESSO_APROVADO', 'Aprovou pedido de acesso'
         ACESSO_RECUSADO = 'ACESSO_RECUSADO', 'Recusou pedido de acesso'
         RELATORIO_PUBLICADO = 'RELATORIO_PUBLICADO', 'Publicou relatório'
+        EMAIL = 'EMAIL', 'Aviso por e-mail'
 
     acao = models.CharField(max_length=30, choices=Acao.choices)
     # SET_NULL: se a conta for eliminada, a linha do log continua,
