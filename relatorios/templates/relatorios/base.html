@@ -9,61 +9,121 @@
 </head>
 <body class="{% block corpo_classe %}{% endblock %}">
 
-{% block topo %}
-<header class="topo">
-    <div class="topo__interno">
+<div class="app">
+
+{% block lateral %}
+    {% if user.is_authenticated %}
+    <aside class="lateral">
 
         <a class="marca" href="{% url 'lista_relatorios' %}">
             <img src="{% static 'img/logo-elo.png' %}" alt="">
             <span>Elo Escolar</span>
         </a>
 
-        {% if user.is_authenticated %}
-            <nav class="menu">
-                <a class="menu__link {% if request.resolver_match.url_name == 'lista_relatorios' %}menu__link--ativo{% endif %}"
-                   href="{% url 'lista_relatorios' %}">Diário de turma</a>
+        <nav class="nav">
 
-                {% if mostrar_pedidos %}
-                    <a class="menu__link {% if request.resolver_match.url_name == 'fila_aprovacao' %}menu__link--ativo{% endif %}"
-                       href="{% url 'fila_aprovacao' %}">
-                        Pedidos de acesso
-                        {% if pedidos_pendentes %}
-                            <span class="etiqueta etiqueta--contador">{{ pedidos_pendentes }}</span>
-                        {% endif %}
-                    </a>
-                {% endif %}
+            <div class="nav__titulo">Acompanhamento</div>
 
-                <span class="menu__usuario">{{ user.get_full_name|default:user.username }}</span>
+            <a class="nav__item {% if request.resolver_match.url_name == 'lista_relatorios' %}nav__item--ativo{% endif %}"
+               href="{% url 'lista_relatorios' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2z"/>
+                    <path d="M8 7h8M8 11h6"/>
+                </svg>
+                Diário de turma
+            </a>
 
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="botao botao--claro botao--pequeno">Sair</button>
-                </form>
-            </nav>
-        {% endif %}
+            {% if pode_publicar %}
+                <a class="nav__item {% if request.resolver_match.url_name == 'cadastrar_relatorio' %}nav__item--ativo{% endif %}"
+                   href="{% url 'cadastrar_relatorio' %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="M12 8v8M8 12h8"/>
+                    </svg>
+                    Publicar relatório
+                </a>
+            {% endif %}
 
-    </div>
-</header>
+            {% if mostrar_pedidos or user.is_staff %}
+                <div class="nav__titulo">Administração</div>
+            {% endif %}
+
+            {% if mostrar_pedidos %}
+                <a class="nav__item {% if request.resolver_match.url_name == 'fila_aprovacao' %}nav__item--ativo{% endif %}"
+                   href="{% url 'fila_aprovacao' %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="8.5" cy="7" r="3.5"/>
+                        <path d="M17 11l2 2 4-4"/>
+                    </svg>
+                    Pedidos de acesso
+                    {% if pedidos_pendentes %}
+                        <span class="etiqueta etiqueta--contador nav__contador">{{ pedidos_pendentes }}</span>
+                    {% endif %}
+                </a>
+            {% endif %}
+
+            {% if user.is_staff %}
+                <a class="nav__item" href="{% url 'admin:auditoria_evento_changelist' %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="M12 7v5l3 2"/>
+                    </svg>
+                    Log de auditoria
+                </a>
+            {% endif %}
+
+        </nav>
+
+        <div class="lateral__pe">
+            <div class="usuario">
+                <span class="usuario__inicial">
+                    {{ user.get_full_name|default:user.username|slice:":1"|upper }}
+                </span>
+                <div class="usuario__texto">
+                    <div class="usuario__nome">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="usuario__perfil">{{ perfil_tipo|default:"Sem perfil" }}</div>
+                </div>
+            </div>
+
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="botao botao--claro botao--pequeno">Sair</button>
+            </form>
+        </div>
+
+    </aside>
+    {% endif %}
 {% endblock %}
 
-<main class="conteudo {% block classe_conteudo %}{% endblock %}">
+<div class="painel">
 
-    {% for mensagem in messages %}
-        <div class="aviso {% if mensagem.tags == 'error' %}aviso--erro{% elif mensagem.tags == 'warning' %}aviso--atencao{% elif mensagem.tags == 'success' %}aviso--sucesso{% endif %}">
-            {{ mensagem }}
-        </div>
-    {% endfor %}
+    <main class="conteudo {% block classe_conteudo %}{% endblock %}">
 
-    {% block conteudo %}{% endblock %}
+        {% for mensagem in messages %}
+            <div class="aviso {% if mensagem.tags == 'error' %}aviso--erro{% elif mensagem.tags == 'warning' %}aviso--atencao{% elif mensagem.tags == 'success' %}aviso--sucesso{% endif %}">
+                {{ mensagem }}
+            </div>
+        {% endfor %}
 
-</main>
+        {% block conteudo %}{% endblock %}
 
-<footer class="rodape">
-    Elo Escolar · Engenharia de Software · UMC<br>
-    <a href="{% url 'termos' %}">Termos de Uso</a>
-    <span class="rodape__separador">·</span>
-    <a href="{% url 'privacidade' %}">Política de Privacidade</a>
-</footer>
+    </main>
+
+    <footer class="rodape">
+        Elo Escolar · Engenharia de Software · UMC<br>
+        <a href="{% url 'termos' %}">Termos de Uso</a>
+        <span class="rodape__separador">·</span>
+        <a href="{% url 'privacidade' %}">Política de Privacidade</a>
+    </footer>
+
+</div>
+
+</div>
 
 </body>
 </html>

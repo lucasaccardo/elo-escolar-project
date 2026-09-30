@@ -103,30 +103,42 @@ textarea:focus-visible {
 .texto-pequeno { font-size: .875rem; }
 .centralizado { text-align: center; }
 
-/* ---------------------------------------------------------------- 3. TOPO */
-.topo {
-    position: sticky;           /* acompanha a rolagem */
-    top: 0;
-    z-index: 10;
-    background-color: rgba(255, 255, 255, .88);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--borda);
+/* ---------------------------------------------------------------- 3. MENU LATERAL
+   A pagina e dividida em duas colunas: o menu (.lateral) e o resto (.painel).
+   Quem nao tem menu (login, cadastro) simplesmente nao desenha a coluna da
+   esquerda, e o painel ocupa a largura toda. */
+.app {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
 }
 
-.topo__interno {
-    max-width: 1060px;
-    margin: 0 auto;
-    padding: .6rem 1.25rem;
+.painel {
+    flex: 1;
+    min-width: 0;               /* impede que texto longo estufe a coluna */
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.lateral {
+    position: sticky;           /* fica parado enquanto a pagina rola */
+    top: 0;
+    width: 250px;
+    flex-shrink: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 1.1rem .85rem 1.1rem;
+    background-color: var(--papel);
+    border-right: 1px solid var(--borda);
 }
 
 .marca {
     display: flex;
     align-items: center;
-    gap: .6rem;
+    gap: .55rem;
+    padding: .3rem .6rem 1.3rem;
     text-decoration: none;
     color: var(--azul-900);
     font-weight: 700;
@@ -134,49 +146,91 @@ textarea:focus-visible {
     letter-spacing: -.01em;
 }
 
-.marca img { height: 34px; width: auto; display: block; }
+.marca img { height: 32px; width: auto; display: block; }
 
-.menu {
-    display: flex;
-    align-items: center;
-    gap: .4rem;
-    flex-wrap: wrap;
+.nav { display: flex; flex-direction: column; gap: .15rem; }
+
+.nav__titulo {
+    padding: 1rem .75rem .35rem;
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--tinta-suave);
 }
 
-.menu__link {
-    display: inline-flex;
+.nav__item {
+    display: flex;
     align-items: center;
-    gap: .45rem;
-    padding: .45rem .85rem;
-    border-radius: 999px;
+    gap: .6rem;
+    padding: .6rem .75rem;
+    border-radius: 10px;
     color: var(--tinta);
     text-decoration: none;
-    font-size: .93rem;
+    font-size: .94rem;
     font-weight: 550;
     transition: background-color var(--transicao), color var(--transicao);
 }
 
-.menu__link:hover { background-color: var(--marca-50); color: var(--marca-900); }
-.menu__link--ativo { background-color: var(--marca-100); color: var(--marca-900); }
+.nav__item svg { width: 17px; height: 17px; flex-shrink: 0; opacity: .7; }
 
-.menu__usuario {
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
-    padding-left: .6rem;
-    margin-left: .2rem;
-    border-left: 1px solid var(--borda);
-    color: var(--tinta-suave);
-    font-size: .88rem;
+.nav__item:hover { background-color: var(--marca-50); color: var(--marca-900); }
+
+.nav__item--ativo {
+    background-color: var(--marca-100);
+    color: var(--marca-900);
+    font-weight: 650;
 }
+
+.nav__item--ativo svg { opacity: 1; }
+
+.nav__contador { margin-left: auto; }
+
+/* Bloco de quem esta logado, colado no pe do menu. */
+.lateral__pe {
+    margin-top: auto;           /* empurra para baixo */
+    padding-top: 1rem;
+    border-top: 1px solid var(--borda);
+}
+
+.usuario {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .3rem .75rem .75rem;
+}
+
+.usuario__inicial {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background-color: var(--marca-100);
+    color: var(--marca-900);
+    font-weight: 700;
+    font-size: .95rem;
+}
+
+.usuario__nome {
+    font-weight: 650;
+    font-size: .9rem;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+.usuario__perfil { font-size: .78rem; color: var(--tinta-suave); }
+
+.lateral__pe .botao { width: 100%; }
 
 /* ---------------------------------------------------------------- 4. CONTEUDO */
 .conteudo {
     flex: 1;                     /* empurra o rodape para baixo */
     width: 100%;
-    max-width: 1060px;
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 2rem 1.25rem 3rem;
+    padding: 2rem 1.75rem 3rem;
 }
 
 .conteudo--estreito { max-width: 760px; }
@@ -578,11 +632,56 @@ input[type="checkbox"] {
 
 .rodape__separador { margin: 0 .4rem; color: var(--marca-300); }
 
-/* ---------------------------------------------------------------- 15. TELAS PEQUENAS */
+/* ---------------------------------------------------------------- 15. TELAS PEQUENAS
+   Abaixo de 860px o menu deixa de ser coluna e vira uma faixa no topo:
+   a marca e o usuario na primeira linha, os links numa linha que rola de lado. */
+@media (max-width: 860px) {
+    .app { flex-direction: column; }
+
+    .lateral {
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .5rem;
+        padding: .6rem .9rem;
+        border-right: none;
+        border-bottom: 1px solid var(--borda);
+        z-index: 10;
+    }
+
+    .marca { padding: 0; margin-right: auto; }
+
+    .nav {
+        order: 3;                /* vai para a segunda linha */
+        width: 100%;
+        flex-direction: row;
+        gap: .35rem;
+        overflow-x: auto;        /* rola de lado quando nao cabe */
+        padding-bottom: .15rem;
+    }
+
+    .nav__item { white-space: nowrap; }
+    .nav__titulo { display: none; }
+
+    .lateral__pe {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .usuario { padding: 0; }
+    .usuario__texto { display: none; }      /* no celular fica so a bolinha */
+    .lateral__pe .botao { width: auto; }
+    .painel { min-height: 0; }
+}
+
 @media (max-width: 640px) {
-    .topo__interno { padding: .55rem .9rem; gap: .5rem; }
     .marca span { display: none; }          /* no celular fica so o simbolo */
-    .menu__usuario { display: none; }
     .conteudo { padding: 1.5rem .9rem 2.5rem; }
     .cartao__corpo, .cartao__topo, .cartao__rodape { padding-left: 1.1rem; padding-right: 1.1rem; }
     .linha-filtro .form-select { width: 100%; }
