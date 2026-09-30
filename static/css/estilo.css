@@ -1,0 +1,595 @@
+/* =========================================================================
+   Elo Escolar - folha de estilo unica
+   Escrita a mao, sem framework: funciona sem internet.
+   Organizacao do arquivo:
+     1. Variaveis     6. Botoes        11. Estado vazio
+     2. Base          7. Formularios   12. Telas de entrada
+     3. Topo          8. Abas          13. Documentos
+     4. Conteudo      9. Avisos        14. Rodape
+     5. Cartoes      10. Etiquetas     15. Telas pequenas
+   ========================================================================= */
+
+/* ---------------------------------------------------------------- 1. VARIAVEIS
+   Tudo que e cor, arredondamento e sombra mora aqui. Para mudar a cara do
+   sistema inteiro basta mexer nestas linhas. As cores vieram da logo:
+   turquesa, azul, laranja e amarelo. */
+:root {
+    --marca-50:  #EEF8F7;   /* fundo de destaque bem claro */
+    --marca-100: #D9EFED;   /* fundo de aba ativa, etiquetas */
+    --marca-300: #8FD3D1;   /* bordas de destaque */
+    --marca-500: #159A9E;   /* turquesa da logo - detalhes */
+    --marca-700: #0F7A75;   /* botoes e links (contraste aprovado) */
+    --marca-900: #0A4F4D;   /* hover e titulos */
+
+    --azul-900:  #214A78;   /* azul da logo */
+    --ambar:     #B26E00;   /* avisos - texto */
+    --ambar-bg:  #FFF6E3;   /* avisos - fundo */
+    --coral:     #B3261E;   /* erros e acoes destrutivas */
+    --coral-bg:  #FDECEA;
+
+    --tinta:       #17313B; /* texto principal */
+    --tinta-suave: #5A6B72; /* texto secundario */
+    --papel:       #FFFFFF; /* fundo dos cartoes */
+    --fundo:       #F5F9F8; /* fundo da pagina */
+    --borda:       #E3EBE9; /* linhas e contornos */
+
+    --raio:      14px;
+    --raio-min:  10px;
+    --sombra:    0 1px 2px rgba(16, 40, 44, .05),
+                 0 12px 32px -22px rgba(16, 40, 44, .45);
+    --sombra-alta: 0 2px 4px rgba(16, 40, 44, .06),
+                   0 20px 44px -24px rgba(16, 40, 44, .5);
+    --transicao: .18s ease;
+}
+
+/* ---------------------------------------------------------------- 2. BASE */
+* { box-sizing: border-box; }
+
+html { color-scheme: light; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;              /* segura o rodape na parte de baixo */
+    flex-direction: column;
+    background-color: var(--fundo);
+    color: var(--tinta);
+    font-family: system-ui, -apple-system, "Segoe UI Variable Text",
+                 "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Clarinho no alto da pagina: da profundidade sem usar imagem. */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto 0;
+    height: 280px;
+    background: linear-gradient(180deg, #E7F4F2 0%, rgba(231, 244, 242, 0) 100%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+h1, h2, h3 {
+    color: var(--marca-900);
+    line-height: 1.25;
+    margin: 0 0 .5rem;
+    letter-spacing: -.015em;
+}
+
+h1 { font-size: clamp(1.45rem, 1.2rem + 1vw, 1.9rem); font-weight: 700; }
+h2 { font-size: 1.15rem; font-weight: 650; }
+h3 { font-size: 1rem;    font-weight: 650; }
+
+p { margin: 0 0 1rem; }
+p:last-child { margin-bottom: 0; }
+
+a { color: var(--marca-700); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--marca-900); }
+
+/* Anel de foco visivel: acessibilidade para quem navega pelo teclado. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid var(--marca-300);
+    outline-offset: 2px;
+}
+
+.texto-suave { color: var(--tinta-suave); }
+.texto-pequeno { font-size: .875rem; }
+.centralizado { text-align: center; }
+
+/* ---------------------------------------------------------------- 3. TOPO */
+.topo {
+    position: sticky;           /* acompanha a rolagem */
+    top: 0;
+    z-index: 10;
+    background-color: rgba(255, 255, 255, .88);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--borda);
+}
+
+.topo__interno {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: .6rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    text-decoration: none;
+    color: var(--azul-900);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -.01em;
+}
+
+.marca img { height: 34px; width: auto; display: block; }
+
+.menu {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    flex-wrap: wrap;
+}
+
+.menu__link {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .45rem .85rem;
+    border-radius: 999px;
+    color: var(--tinta);
+    text-decoration: none;
+    font-size: .93rem;
+    font-weight: 550;
+    transition: background-color var(--transicao), color var(--transicao);
+}
+
+.menu__link:hover { background-color: var(--marca-50); color: var(--marca-900); }
+.menu__link--ativo { background-color: var(--marca-100); color: var(--marca-900); }
+
+.menu__usuario {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding-left: .6rem;
+    margin-left: .2rem;
+    border-left: 1px solid var(--borda);
+    color: var(--tinta-suave);
+    font-size: .88rem;
+}
+
+/* ---------------------------------------------------------------- 4. CONTEUDO */
+.conteudo {
+    flex: 1;                     /* empurra o rodape para baixo */
+    width: 100%;
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+}
+
+.conteudo--estreito { max-width: 760px; }
+
+.cabecalho-pagina {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.cabecalho-pagina p { margin: 0; color: var(--tinta-suave); }
+
+/* ---------------------------------------------------------------- 5. CARTOES */
+.cartao {
+    background-color: var(--papel);
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+    box-shadow: var(--sombra);
+    overflow: hidden;            /* o cabecalho respeita o arredondamento */
+}
+
+.cartao + .cartao { margin-top: 1rem; }
+
+.cartao__corpo { padding: 1.35rem 1.5rem; }
+
+.cartao__topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    flex-wrap: wrap;
+    padding: .9rem 1.5rem;
+    background-color: var(--marca-50);
+    border-bottom: 1px solid var(--borda);
+}
+
+.cartao__topo h2 { margin: 0; font-size: 1.05rem; }
+
+.cartao__rodape {
+    padding: .7rem 1.5rem;
+    border-top: 1px solid var(--borda);
+    color: var(--tinta-suave);
+    font-size: .82rem;
+    text-align: right;
+}
+
+/* Blocos destacados dentro de um relatorio (tarefa e observacao). */
+.bloco {
+    border-radius: var(--raio-min);
+    padding: .85rem 1rem;
+    margin-top: 1rem;
+    font-size: .95rem;
+    border-left: 4px solid var(--marca-300);
+    background-color: var(--marca-50);
+}
+
+.bloco--tarefa { border-left-color: #E8A417; background-color: var(--ambar-bg); }
+.bloco strong { color: var(--marca-900); }
+.bloco--tarefa strong { color: var(--ambar); }
+
+/* Duas colunas que viram uma so em tela pequena. */
+.grade-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1rem;
+}
+
+.dado__rotulo {
+    font-size: .74rem;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--tinta-suave);
+    font-weight: 650;
+    margin-bottom: .15rem;
+}
+
+.dado__valor { font-weight: 600; color: var(--tinta); }
+
+/* ---------------------------------------------------------------- 6. BOTOES */
+.botao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    padding: .62rem 1.15rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font: inherit;
+    font-size: .95rem;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color var(--transicao), border-color var(--transicao),
+                color var(--transicao), transform var(--transicao);
+}
+
+.botao:active { transform: translateY(1px); }
+
+.botao--principal { background-color: var(--marca-700); color: #fff; }
+.botao--principal:hover { background-color: var(--marca-900); color: #fff; }
+
+.botao--claro {
+    background-color: var(--papel);
+    color: var(--tinta);
+    border-color: var(--borda);
+}
+.botao--claro:hover { background-color: var(--marca-50); color: var(--marca-900); }
+
+.botao--perigo {
+    background-color: var(--papel);
+    color: var(--coral);
+    border-color: #E8C4C1;
+}
+.botao--perigo:hover { background-color: var(--coral-bg); color: var(--coral); }
+
+.botao--pequeno { padding: .4rem .85rem; font-size: .86rem; }
+.botao--largo   { width: 100%; }
+
+.acoes { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+
+/* ---------------------------------------------------------------- 7. FORMULARIOS
+   As classes form-control, form-select e form-check-input vem do Python
+   (forms.py). Por isso elas sao estilizadas aqui com estes nomes. */
+.campo { margin-bottom: 1.1rem; }
+.campo:last-of-type { margin-bottom: 0; }
+
+.campo label,
+.rotulo {
+    display: block;
+    margin-bottom: .35rem;
+    font-size: .88rem;
+    font-weight: 620;
+    color: var(--tinta);
+}
+
+.form-control,
+.form-select,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+textarea,
+select {
+    width: 100%;
+    padding: .62rem .8rem;
+    border: 1px solid #D5E0DE;
+    border-radius: var(--raio-min);
+    background-color: var(--papel);
+    color: var(--tinta);
+    font: inherit;
+    font-size: .97rem;
+    transition: border-color var(--transicao), box-shadow var(--transicao);
+}
+
+.form-control:hover,
+.form-select:hover { border-color: var(--marca-300); }
+
+.form-control:focus,
+.form-select:focus,
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--marca-500);
+    box-shadow: 0 0 0 3px rgba(21, 154, 158, .18);
+}
+
+textarea { resize: vertical; min-height: 90px; }
+
+.form-select,
+select { appearance: none; padding-right: 2.2rem;
+    /* setinha desenhada em SVG, sem imagem externa */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235A6B72' d='M1.4 0 6 4.6 10.6 0 12 1.4 6 7.4 0 1.4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right .85rem center;
+}
+
+.ajuda { margin-top: .3rem; font-size: .82rem; color: var(--tinta-suave); }
+.erro-campo { margin-top: .3rem; font-size: .84rem; color: var(--coral); font-weight: 550; }
+
+/* Caixa de aceite dos termos. */
+.aceite {
+    display: flex;
+    gap: .7rem;
+    align-items: flex-start;
+    padding: .9rem 1rem;
+    margin-bottom: 1.1rem;
+    border: 1px solid var(--borda);
+    border-radius: var(--raio-min);
+    background-color: var(--marca-50);
+}
+
+.aceite label { font-weight: 500; font-size: .92rem; margin: 0; }
+
+.form-check-input,
+input[type="checkbox"] {
+    width: 1.15rem;
+    height: 1.15rem;
+    margin: .18rem 0 0;
+    flex-shrink: 0;
+    accent-color: var(--marca-700);
+    cursor: pointer;
+}
+
+/* Filtro em linha (rotulo + lista + botao). */
+.linha-filtro {
+    display: flex;
+    gap: .6rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.linha-filtro .form-select { width: auto; min-width: 220px; }
+.linha-filtro .rotulo { margin: 0; }
+
+/* ---------------------------------------------------------------- 8. ABAS
+   Sao links comuns, nao JavaScript: cada aba e um endereco proprio. */
+.abas {
+    display: flex;
+    gap: .4rem;
+    margin-bottom: 1.4rem;
+    padding-bottom: .25rem;
+    overflow-x: auto;              /* rola de lado no celular */
+    scrollbar-width: thin;
+}
+
+.aba {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .5rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--borda);
+    background-color: var(--papel);
+    color: var(--tinta-suave);
+    text-decoration: none;
+    font-size: .92rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background-color var(--transicao), color var(--transicao),
+                border-color var(--transicao);
+}
+
+.aba:hover { color: var(--marca-900); border-color: var(--marca-300); }
+
+.aba--ativa {
+    background-color: var(--marca-700);
+    border-color: var(--marca-700);
+    color: #fff;
+}
+
+.aba--ativa:hover { color: #fff; }
+
+/* ---------------------------------------------------------------- 9. AVISOS */
+.aviso {
+    display: flex;
+    gap: .6rem;
+    padding: .85rem 1.1rem;
+    border-radius: var(--raio-min);
+    border: 1px solid var(--borda);
+    border-left: 4px solid var(--marca-500);
+    background-color: var(--marca-50);
+    color: var(--marca-900);
+    margin-bottom: 1rem;
+    font-size: .95rem;
+}
+
+.aviso--erro    { border-left-color: var(--coral); background-color: var(--coral-bg); color: var(--coral); border-color: #F0D5D2; }
+.aviso--atencao { border-left-color: #E8A417;      background-color: var(--ambar-bg); color: var(--ambar); border-color: #F2E2C2; }
+.aviso--sucesso { border-left-color: var(--marca-700); }
+
+/* ---------------------------------------------------------------- 10. ETIQUETAS */
+.etiqueta {
+    display: inline-flex;
+    align-items: center;
+    padding: .12rem .55rem;
+    border-radius: 999px;
+    background-color: var(--marca-100);
+    color: var(--marca-900);
+    font-size: .78rem;
+    font-weight: 700;
+    line-height: 1.6;
+}
+
+.etiqueta--contador { background-color: #E8A417; color: #3A2A00; }
+
+/* ---------------------------------------------------------------- 11. ESTADO VAZIO */
+.vazio {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--tinta-suave);
+    background-color: var(--papel);
+    border: 1px dashed #D5E0DE;
+    border-radius: var(--raio);
+}
+
+.vazio strong { display: block; color: var(--tinta); margin-bottom: .25rem; }
+
+/* ---------------------------------------------------------------- 12. TELAS DE ENTRADA
+   Login, cadastro e confirmacao: fundo branco com a onda da marca embaixo. */
+.pagina-entrada { background-color: #fff; position: relative; }
+
+.pagina-entrada::before { display: none; }
+
+/* O rodape fica branco solido para nao "sujar" a onda atras dele. */
+.pagina-entrada .rodape { background-color: #fff; }
+
+.pagina-entrada::after {
+    content: "";
+    position: absolute;      /* no fim da pagina, nao no fim da tela */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 40vh;
+    background: url("../img/1.png") center bottom / cover no-repeat;
+    /* a mascara faz a imagem nascer do branco, sem emenda visivel */
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 45%);
+    mask-image: linear-gradient(180deg, transparent 0%, #000 45%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.entrada {
+    width: 100%;
+    max-width: 430px;
+    margin: 2.5rem auto;
+}
+
+.entrada--larga { max-width: 560px; }
+
+.entrada__marca {
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.entrada__marca img { height: 84px; width: auto; }
+
+.entrada__titulo { text-align: center; margin-bottom: .25rem; }
+
+.entrada__subtitulo {
+    text-align: center;
+    color: var(--tinta-suave);
+    font-size: .92rem;
+    margin-bottom: 1.5rem;
+}
+
+.entrada .cartao { box-shadow: var(--sombra-alta); }
+
+.entrada__pe {
+    text-align: center;
+    font-size: .9rem;
+    margin-top: 1.1rem;
+    color: var(--tinta-suave);
+}
+
+/* ---------------------------------------------------------------- 13. DOCUMENTOS
+   Termos de Uso e Politica de Privacidade. */
+.documento { max-width: 760px; }
+
+.documento h2 {
+    margin-top: 1.8rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--borda);
+    font-size: 1.02rem;
+    color: var(--marca-900);
+}
+
+.documento h2:first-of-type { margin-top: .5rem; border-top: none; padding-top: 0; }
+
+.documento p { color: #35474F; }
+
+.documento__data {
+    display: inline-block;
+    margin-bottom: 1rem;
+    padding: .2rem .7rem;
+    border-radius: 999px;
+    background-color: var(--marca-50);
+    color: var(--tinta-suave);
+    font-size: .8rem;
+}
+
+/* ---------------------------------------------------------------- 14. RODAPE */
+.rodape {
+    border-top: 1px solid var(--borda);
+    background-color: rgba(255, 255, 255, .7);
+    padding: 1.5rem 1.25rem;
+    text-align: center;
+    color: var(--tinta-suave);
+    font-size: .85rem;
+}
+
+.rodape a { color: var(--tinta-suave); text-decoration: none; }
+.rodape a:hover { color: var(--marca-700); text-decoration: underline; }
+
+.rodape__separador { margin: 0 .4rem; color: var(--marca-300); }
+
+/* ---------------------------------------------------------------- 15. TELAS PEQUENAS */
+@media (max-width: 640px) {
+    .topo__interno { padding: .55rem .9rem; gap: .5rem; }
+    .marca span { display: none; }          /* no celular fica so o simbolo */
+    .menu__usuario { display: none; }
+    .conteudo { padding: 1.5rem .9rem 2.5rem; }
+    .cartao__corpo, .cartao__topo, .cartao__rodape { padding-left: 1.1rem; padding-right: 1.1rem; }
+    .linha-filtro .form-select { width: 100%; }
+    .acoes .botao { flex: 1 1 auto; }
+}
+
+/* Respeita quem pediu menos animacao no sistema operacional. */
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+}

@@ -1,43 +1,56 @@
 {% extends 'relatorios/base.html' %}
+{% load static %}
 
 {% block titulo %}Entrar - Elo Escolar{% endblock %}
 
+{% block corpo_classe %}pagina-entrada{% endblock %}
+
+{% block topo %}{% endblock %}
+
 {% block conteudo %}
 
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
+<div class="entrada">
 
-                <h1 class="h4 mb-4 text-center">Acessar o sistema</h1>
+    <div class="entrada__marca">
+        <img src="{% static 'img/logo-elo-completo.png' %}" alt="Elo Escolar">
+    </div>
 
-                {% for erro in form.non_field_errors %}
-                    <div class="alert alert-danger">{{ erro }}</div>
-                {% endfor %}
+    <h1 class="entrada__titulo">Bem-vindo de volta</h1>
+    <p class="entrada__subtitulo">Acompanhe o dia a dia da turma do seu filho.</p>
 
-                <form method="post" class="form-login">
-                    {% csrf_token %}
+    <div class="cartao">
+        <div class="cartao__corpo">
 
-                    <div class="mb-3">
-                        <label class="form-label" for="{{ form.username.id_for_label }}">Usuário ou e-mail</label>
-                        {{ form.username }}
-                    </div>
+            {% for erro in form.non_field_errors %}
+                <div class="aviso aviso--erro">{{ erro }}</div>
+            {% endfor %}
 
-                    <div class="mb-3">
-                        <label class="form-label" for="{{ form.password.id_for_label }}">Senha</label>
-                        {{ form.password }}
-                    </div>
+            <form method="post">
+                {% csrf_token %}
 
-                    <button type="submit" class="btn btn-elo w-100">Entrar</button>
-                </form>
-                    
-                <p class="text-center small mt-3 mb-0">
-                    É responsável e ainda não tem acesso?
-                    <a href="{% url 'cadastro' %}">Cadastre-se</a>
-                </p>
-            </div>
+                <div class="campo">
+                    <label for="{{ form.username.id_for_label }}">Usuário ou e-mail</label>
+                    {{ form.username }}
+                </div>
+
+                <div class="campo">
+                    <label for="{{ form.password.id_for_label }}">Senha</label>
+                    {{ form.password }}
+                </div>
+
+                <div style="margin-top: 1.4rem;">
+                    <button type="submit" class="botao botao--principal botao--largo">Entrar</button>
+                </div>
+            </form>
+
         </div>
     </div>
+
+    <p class="entrada__pe">
+        É responsável e ainda não tem acesso?
+        <a href="{% url 'cadastro' %}">Cadastre-se</a>
+    </p>
+
 </div>
 
 {% endblock %}

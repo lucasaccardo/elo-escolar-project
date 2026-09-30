@@ -4,45 +4,63 @@
 
 {% block conteudo %}
 
-<h1 class="mb-1">Pedidos de acesso</h1>
-<p class="text-muted mb-4">Confira se a pessoa é mesmo responsável pelo aluno antes de aprovar.</p>
+<div class="cabecalho-pagina">
+    <div>
+        <h1>Pedidos de acesso</h1>
+        <p>Confira se a pessoa é mesmo responsável pelo aluno antes de aprovar.</p>
+    </div>
+</div>
 
 {% for pedido in pendentes %}
-    <div class="card shadow-sm mb-3">
-        <div class="card-body">
+    <div class="cartao">
 
-            <div class="row">
-                <div class="col-md-6 mb-2">
-                    <div class="small text-muted">Responsável</div>
-                    <strong>{{ pedido.usuario.get_full_name }}</strong><br>
-                    <span class="small">{{ pedido.usuario.email }}</span>
+        <div class="cartao__topo">
+            <h2>{{ pedido.usuario.get_full_name }}</h2>
+            <span class="etiqueta">Pedido em {{ pedido.criado_em|date:"d/m/Y \à\s H:i" }}</span>
+        </div>
+
+        <div class="cartao__corpo">
+
+            <div class="grade-2">
+                <div>
+                    <div class="dado__rotulo">E-mail do responsável</div>
+                    <div class="dado__valor">{{ pedido.usuario.email }}</div>
+                    <div class="texto-pequeno texto-suave">É com ele que a pessoa vai entrar.</div>
                 </div>
-                <div class="col-md-6 mb-2">
-                    <div class="small text-muted">Aluno</div>
-                    <strong>{{ pedido.aluno.nome_completo }}</strong><br>
-                    <span class="small">RGM {{ pedido.aluno.rgm }} · {{ pedido.aluno.turma }}</span>
+
+                <div>
+                    <div class="dado__rotulo">Aluno</div>
+                    <div class="dado__valor">{{ pedido.aluno.nome_completo }}</div>
+                    <div class="texto-pequeno texto-suave">
+                        RGM {{ pedido.aluno.rgm }} · {{ pedido.aluno.turma }}
+                    </div>
                 </div>
             </div>
-            <div class="small text-muted mb-3">Pedido feito em {{ pedido.criado_em|date:"d/m/Y \à\s H:i" }}</div>
 
-            <div class="d-flex flex-wrap gap-2 align-items-start">
+            <div class="acoes" style="margin-top: 1.4rem;">
+
                 <form method="post" action="{% url 'aprovar_solicitacao' pedido.pk %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-elo">Aprovar</button>
+                    <button type="submit" class="botao botao--principal">Aprovar acesso</button>
                 </form>
 
-                <form method="post" action="{% url 'recusar_solicitacao' pedido.pk %}" class="d-flex flex-grow-1 gap-2">
+                <form method="post" action="{% url 'recusar_solicitacao' pedido.pk %}"
+                      class="acoes" style="flex: 1 1 320px;">
                     {% csrf_token %}
-                    <input type="text" name="justificativa" class="form-control" placeholder="Motivo da recusa (obrigatório)" required>
-                    <button type="submit" class="btn btn-outline-danger">Recusar</button>
+                    <input type="text" name="justificativa" style="flex: 1 1 200px;"
+                           placeholder="Motivo da recusa (obrigatório)" required>
+                    <button type="submit" class="botao botao--perigo">Recusar</button>
                 </form>
+
             </div>
 
         </div>
     </div>
+
 {% empty %}
-    <div class="card shadow-sm">
-        <div class="card-body text-center text-muted">Nenhum pedido esperando análise.</div>
+    <div class="vazio">
+        <strong>Nenhum pedido esperando análise</strong>
+        Quando um responsável se cadastrar, o pedido aparece aqui.
     </div>
 {% endfor %}
 

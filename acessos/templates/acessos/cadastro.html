@@ -1,58 +1,73 @@
 {% extends 'relatorios/base.html' %}
+{% load static %}
 
 {% block titulo %}Cadastro do responsável - Elo Escolar{% endblock %}
 
+{% block corpo_classe %}pagina-entrada{% endblock %}
+
+{% block topo %}{% endblock %}
+
 {% block conteudo %}
 
-<div class="row justify-content-center">
-    <div class="col-md-7">
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
+<div class="entrada entrada--larga">
 
-                <h1 class="h4 mb-2 text-center">Cadastro do responsável</h1>
-                <p class="text-muted small text-center mb-4">
-                    Seu acesso será liberado depois que a escola confirmar o vínculo com o aluno.
-                </p>
+    <div class="entrada__marca">
+        <img src="{% static 'img/logo-elo-completo.png' %}" alt="Elo Escolar">
+    </div>
 
-                <form method="post" novalidate>
-                    {% csrf_token %}
+    <h1 class="entrada__titulo">Cadastro do responsável</h1>
+    <p class="entrada__subtitulo">
+        Seu acesso é liberado depois que a escola confirmar o vínculo com o aluno.
+    </p>
 
-                    {% for campo in form %}
-                        {% if campo.name == 'aceite_termos' %}
-                            <div class="form-check mb-3">
-                                {{ campo }}
-                                <label class="form-check-label" for="{{ campo.id_for_label }}">
-                                    Li e aceito os <a href="{% url 'termos' %}" target="_blank" rel="noopener">Termos de Uso</a>
-                                    e estou ciente da <a href="{% url 'privacidade' %}" target="_blank" rel="noopener">Política de Privacidade</a>.
+    <div class="cartao">
+        <div class="cartao__corpo">
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% for campo in form %}
+                    {% if campo.name == 'aceite_termos' %}
+                        <div class="aceite">
+                            {{ campo }}
+                            <div>
+                                <label for="{{ campo.id_for_label }}">
+                                    Li e aceito os
+                                    <a href="{% url 'termos' %}" target="_blank" rel="noopener">Termos de Uso</a>
+                                    e estou ciente da
+                                    <a href="{% url 'privacidade' %}" target="_blank" rel="noopener">Política de Privacidade</a>.
                                 </label>
                                 {% for erro in campo.errors %}
-                                    <div class="text-danger small">{{ erro }}</div>
+                                    <div class="erro-campo">{{ erro }}</div>
                                 {% endfor %}
                             </div>
-                        {% else %}
-                            <div class="mb-3">
-                                <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
-                                {{ campo }}
-                                {% if campo.help_text %}
-                                    <div class="form-text">{{ campo.help_text }}</div>
-                                {% endif %}
-                                {% for erro in campo.errors %}
-                                    <div class="text-danger small">{{ erro }}</div>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="campo">
+                            <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                            {{ campo }}
+                            {% if campo.help_text %}
+                                <div class="ajuda">{{ campo.help_text }}</div>
+                            {% endif %}
+                            {% for erro in campo.errors %}
+                                <div class="erro-campo">{{ erro }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
 
-                    <button type="submit" class="btn btn-elo w-100">Enviar pedido de acesso</button>
-                </form>
+                <button type="submit" class="botao botao--principal botao--largo">
+                    Enviar pedido de acesso
+                </button>
+            </form>
 
-                <p class="text-center small mt-3 mb-0">
-                    Já tem acesso? <a href="{% url 'login' %}">Entrar</a>
-                </p>
-
-            </div>
         </div>
     </div>
+
+    <p class="entrada__pe">
+        Já tem acesso? <a href="{% url 'login' %}">Entrar</a>
+    </p>
+
 </div>
 
 {% endblock %}

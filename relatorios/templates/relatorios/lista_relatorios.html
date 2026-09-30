@@ -3,64 +3,75 @@
 {% block titulo %}Diário de turma - Elo Escolar{% endblock %}
 
 {% block conteudo %}
-    <h1 class="mb-4">Diário de Turma</h1>
-        {% if pode_publicar %}
-        <a href="{% url 'cadastrar_relatorio' %}" class="btn btn-elo mb-4">Publicar novo relatório</a>
-        {% endif %}
-    
-    <form method="get" class="d-flex gap-2 align-items-center mb-4">
-        <label for="turma" class="mb-0">Turma:</label>
-        <select name="turma" id="turma" class="form-select" style="max-width: 260px;">
-            <option value="">Todas as turmas</option>
-            {% for turma in turmas %}
-                <option value="{{ turma.id }}" {% if turma_selecionada == turma.id|stringformat:"s" %}selected{% endif %}>
-                    {{ turma.nome }}
-                </option>
-            {% endfor %}
-        </select>
-        <button type="submit" class="btn btn-elo">Filtrar</button>
-    </form>
-    
-    {% for relatorio in relatorios %}
-        <div class="card shadow-sm mb-4 border-0">
-            
-            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                <h2 class="h5 mb-0 text-primary">{{ relatorio.turma }}</h2>
-                <small class="text-muted">Aula do dia: <strong>{{ relatorio.data_aula|date:"d/m/Y" }}</strong></small>
-            </div>
-            
-            <div class="card-body">
-                <p class="card-text"><strong>Conteúdo:</strong><br> {{ relatorio.conteudo }}</p>
 
-                {% if relatorio.tarefa_descricao %}
-                    <div class="alert alert-warning mt-3 mb-0">
-                        <p class="mb-0 text-dark"><strong>Tarefa de Casa:</strong> {{ relatorio.tarefa_descricao }}</p>
-                        {% if relatorio.tarefa_data_entrega %}
-                            <p class="mb-0 mt-1 text-dark"><small><strong>Entregar em:</strong> {{ relatorio.tarefa_data_entrega|date:"d/m/Y" }}</small></p>
-                        {% endif %}
-                    </div>
-                {% endif %}
+<div class="cabecalho-pagina">
+    <div>
+        <h1>Diário de turma</h1>
+        <p>O que foi trabalhado em aula, dia a dia.</p>
+    </div>
 
-                {% if relatorio.observacoes %}
-                    <div class="alert alert-secondary mt-3 mb-0">
-                        <p class="mb-0 text-dark"><strong>Observação:</strong> {{ relatorio.observacoes }}</p>
-                    </div>
-                {% endif %}
-            </div>
-            
-            <div class="card-footer bg-white text-end text-muted small py-2">
-                Publicado por {{ relatorio.autor }} em {{ relatorio.publicado_em|date:"d/m/Y H:i" }}
-            </div>
-            
+    {% if pode_publicar %}
+        <a href="{% url 'cadastrar_relatorio' %}" class="botao botao--principal">Publicar relatório</a>
+    {% endif %}
+</div>
+
+{% if turmas %}
+    <div class="abas">
+        <a class="aba {% if not turma_selecionada %}aba--ativa{% endif %}"
+           href="{% url 'lista_relatorios' %}">Todas</a>
+
+        {% for turma in turmas %}
+            <a class="aba {% if turma_selecionada == turma.id|stringformat:'s' %}aba--ativa{% endif %}"
+               href="?turma={{ turma.id }}">{{ turma.nome }}</a>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% for relatorio in relatorios %}
+    <div class="cartao">
+
+        <div class="cartao__topo">
+            <h2>{{ relatorio.turma }}</h2>
+            <span class="etiqueta">Aula de {{ relatorio.data_aula|date:"d/m/Y" }}</span>
         </div>
-        
-    {% empty %}
-        <div class="alert alert-light border border-secondary text-center p-5 text-muted">
-            {% if turma_selecionada %}
-                <p class="mb-0">Nenhum relatório publicado para esta turma.</p>
-            {% else %}
-                <p class="mb-0">Nenhum relatório publicado até o momento.</p>
+
+        <div class="cartao__corpo">
+            <div class="dado__rotulo">Conteúdo trabalhado</div>
+            <p>{{ relatorio.conteudo|linebreaksbr }}</p>
+
+            {% if relatorio.tarefa_descricao %}
+                <div class="bloco bloco--tarefa">
+                    <strong>Tarefa de casa:</strong> {{ relatorio.tarefa_descricao }}
+                    {% if relatorio.tarefa_data_entrega %}
+                        <br><span class="texto-pequeno">Entregar em {{ relatorio.tarefa_data_entrega|date:"d/m/Y" }}</span>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if relatorio.observacoes %}
+                <div class="bloco">
+                    <strong>Observação:</strong> {{ relatorio.observacoes }}
+                </div>
             {% endif %}
         </div>
-    {% endfor %}
+
+        <div class="cartao__rodape">
+            Publicado por {{ relatorio.autor.get_full_name|default:relatorio.autor }}
+            em {{ relatorio.publicado_em|date:"d/m/Y \à\s H:i" }}
+        </div>
+
+    </div>
+
+{% empty %}
+    <div class="vazio">
+        {% if turma_selecionada %}
+            <strong>Nenhum relatório nesta turma</strong>
+            Assim que o professor publicar, o relatório aparece aqui.
+        {% else %}
+            <strong>Nenhum relatório publicado até o momento</strong>
+            Assim que a escola publicar o primeiro, ele aparece aqui.
+        {% endif %}
+    </div>
+{% endfor %}
+
 {% endblock %}
