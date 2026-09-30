@@ -1,0 +1,155 @@
+{% extends 'relatorios/base.html' %}
+{% load static %}
+
+{% block titulo %}Elo Escolar - a escola e a família no mesmo lugar{% endblock %}
+
+{% block corpo_classe %}pagina-inicio{% endblock %}
+
+{% block lateral %}{% endblock %}
+
+{% block conteudo %}
+
+<header class="topo-inicio">
+    <a class="marca" href="{% url 'inicio' %}">
+        <img src="{% static 'img/logo-elo.png' %}" alt="">
+        <span>Elo Escolar</span>
+    </a>
+    <div class="acoes">
+        <a class="botao botao--claro" href="{% url 'cadastro' %}">Criar acesso</a>
+        <a class="botao botao--principal" href="{% url 'login' %}">Entrar</a>
+    </div>
+</header>
+
+<section class="hero">
+  <div class="hero__interno">
+
+    <div>
+        <span class="hero__selo surge" style="--ordem: 0"><i></i> Projeto Final de Curso · UMC</span>
+
+        <h1 class="surge" style="--ordem: 1">
+            A escola e a família <em>no mesmo lugar</em>
+        </h1>
+
+        <p class="hero__texto surge" style="--ordem: 2">
+            O Elo Escolar mostra aos responsáveis o que a turma trabalhou em cada aula e
+            quais tarefas foram passadas. O acesso de cada família é conferido e liberado
+            pela própria escola.
+        </p>
+
+        <div class="acoes surge" style="--ordem: 3">
+            <a class="botao botao--principal" href="{% url 'cadastro' %}">Sou responsável, quero acesso</a>
+            <a class="botao botao--claro" href="{% url 'login' %}">Já tenho conta</a>
+        </div>
+    </div>
+
+    <div class="palco surge" style="--ordem: 4">
+
+        <div class="palco__pontos"></div>
+
+        <div class="palco__cartao">
+            <div class="palco__topo">
+                <span>2 ANO A</span>
+                <span class="etiqueta">Aula de hoje</span>
+            </div>
+            <div class="palco__corpo">
+                <div class="dado__rotulo">Conteúdo trabalhado</div>
+                <div class="palco__linha"></div>
+                <div class="palco__linha"></div>
+                <div class="palco__linha palco__linha--curta"></div>
+
+                <div class="palco__aviso">Tarefa de casa · entregar sexta-feira</div>
+            </div>
+        </div>
+
+        <div class="palco__etiqueta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5"/>
+            </svg>
+            Acesso liberado pela escola
+        </div>
+
+    </div>
+
+  </div>
+
+  <div class="rolar">
+      role para ver mais
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 9l6 6 6-6"/>
+      </svg>
+  </div>
+</section>
+
+<section class="faixa">
+    <div class="faixa__interno">
+
+        <h2 class="revela">O que o sistema faz</h2>
+        <p class="faixa__texto revela">Três coisas, bem feitas.</p>
+
+        <div class="cartoes">
+
+            <article class="recurso revela">
+                <div class="recurso__icone">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2z"/>
+                        <path d="M8 7h8M8 11h6"/>
+                    </svg>
+                </div>
+                <h3>Diário de turma</h3>
+                <p>
+                    O professor publica o que foi trabalhado, a tarefa de casa e a data de
+                    entrega. A família acompanha sem precisar perguntar.
+                </p>
+            </article>
+
+            <article class="recurso revela">
+                <div class="recurso__icone">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="8.5" cy="7" r="3.5"/>
+                        <path d="M17 11l2 2 4-4"/>
+                    </svg>
+                </div>
+                <h3>Acesso conferido</h3>
+                <p>
+                    A conta do responsável nasce desligada. Ela só é liberada depois que a
+                    escola confirma o vínculo com a criança, e a decisão fica registrada.
+                </p>
+            </article>
+
+            <article class="recurso revela">
+                <div class="recurso__icone">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3l7 3v6c0 4.2-2.8 7.6-7 9-4.2-1.4-7-4.8-7-9V6z"/>
+                        <path d="M9.5 12l1.8 1.8 3.7-3.7"/>
+                    </svg>
+                </div>
+                <h3>Dados protegidos</h3>
+                <p>
+                    Cada perfil enxerga apenas o que lhe cabe, as senhas ficam guardadas em
+                    hash e todo acesso é registrado em log, seguindo a LGPD.
+                </p>
+            </article>
+
+        </div>
+
+    </div>
+</section>
+
+<section class="chamada">
+    <h2 class="revela">Pronto para começar?</h2>
+    <p class="revela">
+        Se a sua escola já usa o Elo Escolar, peça o RGM do seu filho na secretaria e crie o seu acesso.
+    </p>
+    <div class="acoes revela" style="justify-content: center;">
+        <a class="botao botao--principal" href="{% url 'cadastro' %}">Criar meu acesso</a>
+        <a class="botao botao--claro" href="{% url 'login' %}">Entrar</a>
+    </div>
+</section>
+
+{% endblock %}

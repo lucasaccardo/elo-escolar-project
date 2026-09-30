@@ -10,6 +10,17 @@ from .models import RelatorioDiario
 from .permissions import pode_publicar_relatorio, turmas_visiveis
 
 
+
+
+def pagina_inicial(request):
+    # Vitrine publica. Quem ja esta logado nao precisa dela: vai direto ao sistema.
+    if request.user.is_authenticated:
+        return redirect('lista_relatorios')
+    return render(request, 'relatorios/inicio.html')
+
+
+
+
 @login_required
 def lista_relatorios(request):
     turmas = turmas_visiveis(request.user).order_by('nome')

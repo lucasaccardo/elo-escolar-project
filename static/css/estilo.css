@@ -334,8 +334,43 @@ textarea:focus-visible {
 
 .botao:active { transform: translateY(1px); }
 
-.botao--principal { background-color: var(--marca-700); color: #fff; }
+.botao--principal {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--marca-700);
+    color: #fff;
+}
+
 .botao--principal:hover { background-color: var(--marca-900); color: #fff; }
+
+/* Brilho que atravessa o botao quando o mouse passa. */
+.botao--principal::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 35%,
+                rgba(255, 255, 255, .32) 50%, transparent 65%);
+    transform: translateX(-130%);
+    transition: transform .65s ease;
+}
+
+.botao--principal:hover::after { transform: translateX(130%); }
+
+/* Link de voltar, com a seta que anda para tras no hover. */
+.voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    margin-bottom: 1rem;
+    color: var(--tinta-suave);
+    text-decoration: none;
+    font-size: .9rem;
+    font-weight: 600;
+}
+
+.voltar svg { width: 16px; height: 16px; transition: transform var(--transicao); }
+.voltar:hover { color: var(--marca-700); }
+.voltar:hover svg { transform: translateX(-4px); }
 
 .botao--claro {
     background-color: var(--papel);
@@ -688,7 +723,376 @@ input[type="checkbox"] {
     .acoes .botao { flex: 1 1 auto; }
 }
 
-/* Respeita quem pediu menos animacao no sistema operacional. */
+/* ---------------------------------------------------------------- 16. PAGINA INICIAL
+   A unica tela do projeto feita para impressionar em dez segundos.
+   Todo o movimento daqui e CSS puro: nao ha JavaScript nem biblioteca. */
+.pagina-inicio { background-color: #fff; }
+.pagina-inicio::before { display: none; }
+.pagina-inicio .conteudo { max-width: none; padding: 0; }   /* deixa as faixas ocuparem a tela toda */
+.pagina-inicio .rodape { background-color: #fff; }
+
+/* --- animacoes --- */
+@keyframes surgir {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: none; }
+}
+
+@keyframes flutuar {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-14px); }
+}
+
+@keyframes derivar {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(-40px, 30px) scale(1.12); }
+}
+
+@keyframes pulsar {
+    0%, 100% { transform: scale(1);   opacity: 1; }
+    50%      { transform: scale(1.5); opacity: 0; }
+}
+
+/* Giro de leve em tres dimensoes: o cartao "respira" em vez de so subir e descer. */
+@keyframes girar-leve {
+    from { transform: perspective(1200px) rotateY(7deg)  rotateX(2deg)  translateY(0); }
+    to   { transform: perspective(1200px) rotateY(-4deg) rotateX(-2deg) translateY(-16px); }
+}
+
+/* Brilho que atravessa as linhas cinzas, como conteudo carregando. */
+@keyframes brilho {
+    from { background-position: -180% 0; }
+    to   { background-position: 280% 0; }
+}
+
+/* Setinha de "role para ver mais". */
+@keyframes quicar {
+    0%, 100% { transform: translateY(0);    opacity: .55; }
+    50%      { transform: translateY(7px);  opacity: 1; }
+}
+
+/* .surge = entra suave assim que a pagina abre.
+   O atraso de cada elemento e dado por --ordem, para um entrar depois do outro. */
+.surge {
+    opacity: 0;
+    animation: surgir .7s cubic-bezier(.2, .7, .3, 1) forwards;
+    animation-delay: calc(var(--ordem, 0) * .12s);
+}
+
+.topo-inicio {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: .9rem 2rem;
+    background-color: rgba(255, 255, 255, .85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--borda);
+}
+
+.topo-inicio .marca { padding: 0; }
+
+/* --- faixa principal --- */
+.hero {
+    position: relative;
+    overflow: hidden;            /* segura as manchas de cor dentro da faixa */
+    padding: 4.5rem 2rem 5rem;
+}
+
+.hero__interno {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1.05fr .95fr;
+    align-items: center;
+    gap: 3rem;
+    max-width: 1140px;
+    margin: 0 auto;
+}
+
+/* As duas manchas de cor que se movem devagar no fundo. */
+.hero::before,
+.hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.hero::before {
+    width: 540px; height: 540px;
+    top: -220px; right: -140px;
+    background: radial-gradient(circle at 35% 35%, rgba(21, 154, 158, .30), transparent 68%);
+    animation: derivar 16s ease-in-out infinite alternate;
+}
+
+.hero::after {
+    width: 460px; height: 460px;
+    bottom: -240px; left: -160px;
+    background: radial-gradient(circle at 60% 40%, rgba(249, 181, 24, .26), transparent 68%);
+    animation: derivar 21s ease-in-out infinite alternate-reverse;
+}
+
+.hero h1 { text-wrap: balance; }
+
+.hero__selo {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .35rem .85rem;
+    margin-bottom: 1.1rem;
+    border-radius: 999px;
+    background-color: var(--marca-50);
+    border: 1px solid var(--marca-100);
+    color: var(--marca-900);
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+/* A bolinha que pisca ao lado do selo. */
+.hero__selo i {
+    position: relative;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background-color: var(--marca-500);
+}
+
+.hero__selo i::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background-color: var(--marca-500);
+    animation: pulsar 2.4s ease-out infinite;
+}
+
+.hero h1 {
+    font-size: clamp(2.1rem, 1.4rem + 2.6vw, 3.2rem);
+    line-height: 1.1;
+    margin-bottom: 1rem;
+}
+
+.hero h1 em {
+    font-style: normal;
+    color: var(--marca-700);
+}
+
+.hero__texto {
+    font-size: 1.08rem;
+    color: var(--tinta-suave);
+    max-width: 46ch;
+    margin-bottom: 1.8rem;
+}
+
+/* --- o cartao que flutua do lado direito --- */
+.palco {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 340px;
+}
+
+.palco__cartao {
+    width: 100%;
+    max-width: 370px;
+    background-color: var(--papel);
+    border: 1px solid var(--borda);
+    border-radius: 18px;
+    box-shadow: 0 30px 60px -30px rgba(16, 40, 44, .45);
+    overflow: hidden;
+    animation: girar-leve 7s ease-in-out infinite alternate;
+}
+
+/* Pontinhos decorativos, como os do papel de parede da marca. */
+.palco__pontos {
+    position: absolute;
+    left: -6%;
+    top: 4%;
+    width: 120px;
+    height: 120px;
+    background-image: radial-gradient(var(--marca-300) 1.8px, transparent 1.8px);
+    background-size: 15px 15px;
+    opacity: .7;
+    animation: flutuar 6s ease-in-out 1s infinite alternate;
+    pointer-events: none;
+}
+
+.palco__topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .8rem 1.1rem;
+    background-color: var(--marca-50);
+    border-bottom: 1px solid var(--borda);
+    font-weight: 700;
+    color: var(--marca-900);
+    font-size: .95rem;
+}
+
+.palco__corpo { padding: 1.1rem; font-size: .92rem; color: #35474F; }
+
+.palco__linha {
+    height: 9px;
+    border-radius: 999px;
+    margin-bottom: .55rem;
+    background-color: #EDF3F2;
+    background-image: linear-gradient(90deg,
+        transparent 0%, rgba(21, 154, 158, .22) 50%, transparent 100%);
+    background-size: 60% 100%;
+    background-repeat: no-repeat;
+    animation: brilho 2.6s ease-in-out infinite;
+}
+
+.palco__linha:nth-child(3) { animation-delay: .18s; }
+.palco__linha:nth-child(4) { animation-delay: .36s; }
+
+.palco__linha--curta { width: 62%; }
+
+.palco__aviso {
+    margin-top: .9rem;
+    padding: .7rem .85rem;
+    border-radius: 10px;
+    border-left: 4px solid #E8A417;
+    background-color: var(--ambar-bg);
+    color: var(--ambar);
+    font-size: .85rem;
+    font-weight: 600;
+}
+
+/* Etiqueta que flutua em cima do cartao, no ritmo contrario. */
+.palco__etiqueta {
+    position: absolute;
+    right: 2%;
+    bottom: 12%;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .6rem .9rem;
+    border-radius: 14px;
+    background-color: var(--papel);
+    border: 1px solid var(--borda);
+    box-shadow: var(--sombra-alta);
+    font-size: .85rem;
+    font-weight: 650;
+    color: var(--marca-900);
+    animation: flutuar 4s ease-in-out .6s infinite alternate-reverse;
+}
+
+.palco__etiqueta svg { width: 18px; height: 18px; color: var(--marca-700); }
+
+/* --- faixa dos tres cartoes --- */
+.faixa {
+    background-color: var(--fundo);
+    border-top: 1px solid var(--borda);
+    border-bottom: 1px solid var(--borda);
+    padding: 3.5rem 2rem;
+}
+
+.faixa__interno { max-width: 1140px; margin: 0 auto; }
+
+.faixa h2 { font-size: 1.5rem; margin-bottom: .4rem; }
+
+.faixa__texto { color: var(--tinta-suave); margin-bottom: 2rem; }
+
+.cartoes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.1rem;
+}
+
+.recurso {
+    background-color: var(--papel);
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+    padding: 1.5rem;
+    transition: transform var(--transicao), box-shadow var(--transicao);
+}
+
+.recurso:hover { transform: translateY(-5px); box-shadow: var(--sombra-alta); }
+
+.recurso__icone {
+    display: grid;
+    place-items: center;
+    width: 42px; height: 42px;
+    margin-bottom: .9rem;
+    border-radius: 12px;
+    background-color: var(--marca-100);
+    color: var(--marca-900);
+}
+
+.recurso__icone svg { width: 21px; height: 21px; }
+.recurso h3 { margin-bottom: .35rem; }
+.recurso p { color: var(--tinta-suave); font-size: .94rem; }
+
+/* Nos navegadores que suportam, os cartoes entram conforme a pagina rola. */
+@supports (animation-timeline: view()) {
+    .revela {
+        opacity: 0;
+        animation: surgir .8s ease-out forwards;
+        animation-timeline: view();
+        animation-range: entry 5% cover 28%;
+    }
+
+    /* Cada cartao termina de aparecer um pouco depois do anterior. */
+    .cartoes .revela:nth-child(2) { animation-range: entry 5% cover 36%; }
+    .cartoes .revela:nth-child(3) { animation-range: entry 5% cover 44%; }
+}
+
+/* Indicador de "role para ver mais", no pe da primeira faixa. */
+.rolar {
+    position: absolute;
+    left: 50%;
+    bottom: 1.1rem;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .15rem;
+    color: var(--tinta-suave);
+    font-size: .76rem;
+    font-weight: 600;
+    z-index: 1;
+}
+
+.rolar svg { width: 20px; height: 20px; animation: quicar 1.9s ease-in-out infinite; }
+
+/* --- chamada final --- */
+.chamada {
+    position: relative;
+    overflow: hidden;
+    padding: 4rem 2rem 5rem;
+    text-align: center;
+    background:
+        url("../img/1.png") center bottom / cover no-repeat;
+}
+
+.chamada::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, #fff 6%, rgba(255, 255, 255, .72) 55%, rgba(255, 255, 255, .25));
+}
+
+.chamada > * { position: relative; }
+.chamada h2 { font-size: 1.7rem; margin-bottom: .5rem; }
+.chamada p { color: var(--tinta-suave); margin-bottom: 1.5rem; }
+
+@media (max-width: 860px) {
+    .hero { padding: 2.5rem 1.25rem 3rem; }
+    .hero__interno { grid-template-columns: 1fr; gap: 2.5rem; }
+    .palco { min-height: 280px; }
+    .palco__etiqueta { right: 0; bottom: 6%; }
+    .topo-inicio { padding: .75rem 1.25rem; }
+    .faixa, .chamada { padding-left: 1.25rem; padding-right: 1.25rem; }
+}
+
+/* Respeita quem pediu menos animacao no sistema operacional.
+   Sem isso, quem tem labirintite ou enxaqueca passa mal com a tela se mexendo. */
 @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; }
+    * { transition: none !important; animation: none !important; }
+    .surge, .revela { opacity: 1 !important; transform: none !important; }
 }
