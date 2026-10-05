@@ -38,7 +38,7 @@ class CadastroResponsavelForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Dá a aparência do Bootstrap a todos os campos de uma vez.
+        # Marca todos os campos de uma vez com as classes que o estilo.css usa.
         for nome_campo, campo in self.fields.items():
             if nome_campo == 'aceite_termos':
                 campo.widget.attrs['class'] = 'form-check-input'
