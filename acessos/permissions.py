@@ -1,7 +1,7 @@
 from relatorios.models import Perfil
 from relatorios.permissions import obter_perfil, turmas_visiveis
 
-from .models import SolicitacaoAcesso
+from .models import VERSAO_TERMOS, AceiteTermos, SolicitacaoAcesso
 
 # Quem pode analisar pedidos de acesso de responsáveis.
 # Negue por padrão: quem não está nesta lista, não analisa.
@@ -29,3 +29,10 @@ def solicitacoes_que_pode_analisar(user):
     return SolicitacaoAcesso.objects.filter(
         aluno__turma__in=turmas_visiveis(user)
     )
+
+def aceitou_termos(user):
+    # Negue por padrao: sem registro da versao vigente, nao aceitou.
+    return AceiteTermos.objects.filter(
+        usuario=user,
+        versao=VERSAO_TERMOS,
+    ).exists()

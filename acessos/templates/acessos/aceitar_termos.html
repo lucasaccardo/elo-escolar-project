@@ -1,0 +1,72 @@
+{% extends 'relatorios/base.html' %}
+{% load static %}
+
+{% block titulo %}Aceite dos Termos de Uso - Elo Escolar{% endblock %}
+
+{% block corpo_classe %}pagina-entrada{% endblock %}
+
+{% block lateral %}{% endblock %}
+
+{% block conteudo %}
+
+<div class="entrada entrada--larga">
+
+    <div class="entrada__marca">
+        <img src="{% static 'img/logo-elo-completo.png' %}" alt="Elo Escolar">
+    </div>
+
+    <h1 class="entrada__titulo">Antes de continuar</h1>
+    <p class="entrada__subtitulo">
+        Para usar o sistema é preciso aceitar os Termos de Uso em vigor.
+    </p>
+
+    <div class="cartao">
+        <div class="cartao__corpo">
+
+            <p>
+                Olá, {{ user.get_full_name|default:user.username }}. A sua conta ainda não tem
+                registro de aceite da versão vigente dos Termos de Uso
+                (versão {{ versao }}).
+            </p>
+
+            <p>
+                Leia os
+                <a href="{% url 'termos' %}" target="_blank" rel="noopener">Termos de Uso</a>
+                e a
+                <a href="{% url 'privacidade' %}" target="_blank" rel="noopener">Política de Privacidade</a>
+                e confirme abaixo. O seu aceite fica registrado com data e hora.
+            </p>
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ destino }}">
+
+                <div class="aceite">
+                    <input type="checkbox" name="aceite" id="id_aceite" value="1">
+                    <div>
+                        <label for="id_aceite">
+                            Li e aceito os Termos de Uso e estou ciente da Política de Privacidade.
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="botao botao--principal botao--largo">
+                    Aceitar e continuar
+                </button>
+            </form>
+
+            <form method="post" action="{% url 'logout' %}" class="centralizado"
+                  style="margin-top: 1.2rem;">
+                {% csrf_token %}
+                <span class="texto-pequeno texto-suave">Não concorda?</span>
+                <button type="submit" class="botao botao--claro botao--pequeno">
+                    Sair do sistema
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

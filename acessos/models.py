@@ -48,3 +48,28 @@ class SolicitacaoAcesso(models.Model):
 
     def __str__(self):
         return f'{self.usuario} - {self.aluno} ({self.get_status_display()})'
+
+# Versao vigente dos Termos de Uso. Trocar esta linha quando o texto mudar
+# faz o sistema pedir um novo aceite a todo mundo.
+VERSAO_TERMOS = '2026-09-21'
+
+class AceiteTermos(models.Model):
+    """Prova de que um usuario aceitou os Termos, e de qual versao."""
+
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='aceites',
+    )
+    versao = models.CharField(max_length=20)
+    aceito_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # Uma conta so aceita a mesma versao uma vez.
+        unique_together = ('usuario', 'versao')
+        ordering = ['-aceito_em']
+        verbose_name = 'aceite dos termos'
+        verbose_name_plural = 'aceites dos termos'
+
+    def __str__(self):
+        return f'{self.usuario} aceitou a versao {self.versao}'

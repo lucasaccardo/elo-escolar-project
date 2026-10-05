@@ -5,6 +5,7 @@ from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from auditoria.models import Evento
@@ -12,7 +13,7 @@ from auditoria.services import registrar
 from relatorios.models import Perfil
 
 from .forms import CadastroResponsavelForm
-from .models import SolicitacaoAcesso
+from .models import VERSAO_TERMOS, AceiteTermos, SolicitacaoAcesso
 from .notificacoes import enviar_email
 from .permissions import pode_aprovar_acessos, solicitacoes_que_pode_analisar
 
@@ -39,6 +40,11 @@ def cadastro_responsavel(request):
                     aluno=form.aluno,
                     aceite_termos_em=timezone.now(),
                 )
+                # Mesmo aceite, agora na tabela que vale para todo usuario.
+                AceiteTermos.objects.create(
+                    usuario=usuario,
+                    versao=VERSAO_TERMOS,
+                )
             return redirect('cadastro_enviado')
     else:
         form = CadastroResponsavelForm()
@@ -56,6 +62,32 @@ def termos_de_uso(request):
 
 def politica_privacidade(request):
     return render(request, 'acessos/privacidade.html')
+
+
+@login_required
+def aceitar_termos(request):
+    # Tela de bloqueio: quem nao aceitou a versao vigente para aqui.
+    destino = request.POST.get('next') or request.GET.get('next') or ''
+    # So aceita voltar para dentro do proprio site.
+    if not url_has_allowed_host_and_scheme(destino, {request.get_host()}):
+        destino = ''
+    if request.method == 'POST':
+        if request.POST.get('aceite'):
+            AceiteTermos.objects.get_or_create(
+                usuario=request.user,
+                versao=VERSAO_TERMOS,
+            )
+            registrar(
+                Evento.Acao.TERMOS_ACEITOS,
+                usuario=request.user,
+                detalhe=f'versao {VERSAO_TERMOS}',
+            )
+            return redirect(destino or 'lista_relatorios')
+        messages.error(request, 'É preciso marcar a caixa para continuar.')
+    return render(request, 'acessos/aceitar_termos.html', {
+        'destino': destino,
+        'versao': VERSAO_TERMOS,
+    })
 
 
 @login_required
