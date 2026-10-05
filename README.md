@@ -41,6 +41,9 @@ Projeto Final de Curso — Engenharia de Software — Universidade de Mogi das C
 - Ficam acessíveis **em todas as telas**, pelo rodapé (`relatorios/templates/relatorios/base.html`), e no aceite do cadastro, que grava a data e a hora do aceite (`SolicitacaoAcesso.aceite_termos_em`).
 - Base legal adotada: execução de políticas públicas de educação (Lei nº 13.709/2018, art. 7º, III, e art. 23).
 - Minimização: o sistema não coleta CPF do aluno nem endereço, e o relatório é sempre da turma, nunca de um aluno individualmente.
+- **Acrescentado em 05/10/2026, após revisão do orientador:** o aceite deixou de ser apenas um dado de cadastro e passou a ser uma regra de acesso. O middleware `ExigirAceiteTermos` (`acessos/middleware.py`) barra qualquer rota protegida, inclusive o painel administrativo, enquanto a conta não tiver registro de aceite da versão vigente. Antes disso, uma conta criada pelo terminal ou pelo painel entrava sem nunca ter aceitado nada.
+- O aceite é versionado no model `AceiteTermos`, que guarda usuário, versão e data/hora. A versão vigente fica na constante `VERSAO_TERMOS`: alterá-la faz o sistema exigir novo aceite de todos, de modo que a prova do consentimento sempre se refere ao texto em vigor.
+- A tela de aceite devolve o usuário ao destino que ele tentou abrir, e esse destino é validado com `url_has_allowed_host_and_scheme` para evitar redirecionamento para fora do site.
 
 **5. Integração com API externa**
 
@@ -99,6 +102,7 @@ A API de CEP (ViaCEP), citada na ficha de caracterização, foi descartada: exig
 - O filtro de turmas usa abas implementadas como links (`?turma=<id>`): funciona com JavaScript desligado e cada turma tem endereço próprio.
 - Acessibilidade: a regra `@media (prefers-reduced-motion: reduce)` desliga transições e animações para quem configurou o sistema operacional pedindo menos movimento.
 - O projeto não usa nenhuma biblioteca de JavaScript.
+- A tela de aceite dos Termos (`/acessos/termos/aceitar/`) usa o mesmo layout das telas de entrada, sem menu lateral: quem está nela ainda não tem acesso ao sistema.
 
 ## Tecnologias
 
@@ -130,12 +134,13 @@ elo-escolar/
 │   ├── admin.py                  registro no painel administrativo
 │   └── templates/                base.html (casca e menu), inicio.html (vitrine), login e telas do relatório
 ├── acessos/                      domínio do acesso ao sistema
-│   ├── models.py                 SolicitacaoAcesso
+│   ├── models.py                 SolicitacaoAcesso e AceiteTermos
+│   ├── middleware.py             exige o aceite dos termos em toda rota protegida
 │   ├── forms.py                  cadastro do responsável e formulário de login
 │   ├── permissions.py            quem pode analisar cada pedido
 │   ├── notificacoes.py           integração com a API de e-mail
 │   ├── context_processors.py     monta o menu lateral conforme o perfil
-│   ├── views.py                  cadastro, fila, aprovação, recusa, termos e política
+│   ├── views.py                  cadastro, fila, aprovação, recusa, termos, política e aceite
 │   ├── urls.py                   rotas do app
 │   └── templates/acessos/        cadastro, fila, termos, política
 ├── auditoria/                    domínio do log de auditoria
