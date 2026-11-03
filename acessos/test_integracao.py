@@ -79,6 +79,7 @@ class PaginasPublicasTest(BaseDeAcesso):
         resposta = self.client.get(reverse('cadastro_enviado'))
 
         self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, 'Pedido enviado')
 
 
 class CadastroResponsavelTest(BaseDeAcesso):
@@ -173,6 +174,7 @@ class AceiteDosTermosTest(BaseDeAcesso):
         resposta = self.client.get(reverse('aceitar_termos'))
 
         self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, 'Antes de continuar')
 
     def test_aceitar_grava_a_versao_e_libera_o_sistema(self):
         # Caminho feliz com efeito persistido.
@@ -232,6 +234,7 @@ class FilaDeAprovacaoTest(BaseDeAcesso):
         resposta = self.client.get(reverse('fila_aprovacao'))
 
         self.assertEqual(resposta.status_code, 403)
+        self.assertContains(resposta, 'Forbidden', status_code=403)
 
     def test_visitante_anonimo_nao_abre_a_fila(self):
         # Seguranca: sem sessao.
@@ -246,6 +249,16 @@ class FilaDeAprovacaoTest(BaseDeAcesso):
 
         resposta = self.client.get(
             reverse('aprovar_solicitacao', args=[self.pedido.pk])
+        )
+
+        self.assertEqual(resposta.status_code, 405)
+
+    def test_recusar_por_get_e_recusado_com_405(self):
+        # Quarto cenario de erro 4xx. Recusar muda estado, entao so POST.
+        self.client.force_login(self.coordenador)
+
+        resposta = self.client.get(
+            reverse('recusar_solicitacao', args=[self.pedido.pk])
         )
 
         self.assertEqual(resposta.status_code, 405)

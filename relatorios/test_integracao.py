@@ -12,10 +12,11 @@ de uma transacao que e desfeita ao terminar, entao nenhum teste enxerga o que o
 outro gravou.
 """
 
+import urllib.request
 from datetime import date
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import LiveServerTestCase, TestCase
 from django.urls import reverse
 
 from acessos.models import VERSAO_TERMOS, AceiteTermos
@@ -178,6 +179,7 @@ class CadastrarRelatorioTest(BaseDeIntegracao):
         )
 
         self.assertEqual(resposta.status_code, 403)
+        self.assertContains(resposta, 'Forbidden', status_code=403)
         self.assertEqual(RelatorioDiario.objects.count(), 0)
 
     def test_turma_de_outro_professor_e_recusada_pelo_formulario(self):
@@ -211,3 +213,52 @@ class CadastrarRelatorioTest(BaseDeIntegracao):
 
         self.assertEqual(resposta.status_code, 302)
         self.assertIn(reverse('login'), resposta['Location'])
+
+
+class SemRedirecionar(urllib.request.HTTPErrorProcessor):
+    """Faz o urlopen devolver 3xx e 4xx em vez de estourar excecao.
+
+    O enunciado pede um cliente HTTP que nao quebre em erro, para que o status
+    possa ser conferido por assercao. No Spring isso e o defaultStatusHandler;
+    aqui e esta classe de tres linhas.
+    """
+
+    def http_response(self, requisicao, resposta):
+        return resposta
+
+    https_response = http_response
+
+
+class HttpRealTest(LiveServerTestCase):
+    """Testes por HTTP de verdade, em porta aleatoria.
+
+    As outras classes usam o cliente de teste do Django, que chama a aplicacao
+    dentro do proprio processo. Esta sobe um servidor de verdade numa porta
+    livre escolhida na hora e faz a requisicao pela rede. E o equivalente, no
+    Django, ao @SpringBootTest(webEnvironment = RANDOM_PORT) com RestClient que
+    o enunciado exige em pelo menos uma classe.
+
+    Como a porta e sorteada a cada execucao, estes testes continuam passando
+    mesmo com a aplicacao de desenvolvimento rodando na 8000.
+    """
+
+    def buscar(self, caminho):
+        cliente = urllib.request.build_opener(SemRedirecionar)
+        with cliente.open(self.live_server_url + caminho) as resposta:
+            corpo = resposta.read().decode('utf-8')
+            return resposta.status, corpo, resposta.headers
+
+    def test_vitrine_publica_responde_por_http_real(self):
+        # Caminho feliz: status e corpo, vindos de uma requisicao de rede.
+        status, corpo, _ = self.buscar('/')
+
+        self.assertEqual(status, 200)
+        self.assertIn('Elo Escolar', corpo)
+
+    def test_rota_protegida_devolve_302_para_o_login_por_http_real(self):
+        # Seguranca conferida pela rede: sem sessao, o servidor responde 302
+        # e o header Location aponta para a tela de login.
+        status, _, cabecalhos = self.buscar('/relatorios/')
+
+        self.assertEqual(status, 302)
+        self.assertIn(reverse('login'), cabecalhos['Location'])
