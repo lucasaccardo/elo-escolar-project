@@ -1,0 +1,59 @@
+{% extends 'relatorios/base.html' %}
+
+{% block titulo %}Editar relatório - Elo Escolar{% endblock %}
+
+{% block classe_conteudo %}conteudo--estreito{% endblock %}
+
+{% block conteudo %}
+
+<div class="cabecalho-pagina">
+    <div>
+        <h1>Editar relatório</h1>
+        <p>A correção fica visível para as famílias: o relatório passa a
+           mostrar a data e a hora em que foi alterado.</p>
+    </div>
+</div>
+
+<div class="cartao">
+    <div class="cartao__topo">
+        <h2>{{ relatorio.turma }}</h2>
+        <span class="etiqueta">Aula de {{ relatorio.data_aula|date:"d/m/Y" }}</span>
+    </div>
+
+    <div class="cartao__corpo">
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% for campo in form %}
+                <div class="campo">
+                    <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                    {{ campo }}
+                    {% if campo.help_text %}
+                        <div class="ajuda">{{ campo.help_text }}</div>
+                    {% endif %}
+                    {% for erro in campo.errors %}
+                        <div class="erro-campo">{{ erro }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <div class="acoes" style="margin-top: 1.5rem;">
+                <button type="submit" class="botao botao--principal">Salvar alterações</button>
+                <a href="{% url 'lista_relatorios' %}" class="botao botao--claro">Cancelar</a>
+            </div>
+        </form>
+
+    </div>
+
+    {% if relatorio.foi_editado %}
+        <div class="cartao__rodape">
+            <span class="etiqueta etiqueta--editado">
+                Editado em {{ relatorio.editado_em|date:"d/m/Y \à\s H:i" }}
+            </span>
+            por {{ relatorio.editado_por.get_full_name|default:relatorio.editado_por }}
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}
