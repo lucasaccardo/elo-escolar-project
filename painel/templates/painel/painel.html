@@ -1,0 +1,139 @@
+{% extends 'relatorios/base.html' %}
+{% load static %}
+
+{% block titulo %}Painel - Elo Escolar{% endblock %}
+
+{% block conteudo %}
+
+<div class="cabecalho-pagina">
+    <div>
+        <h1>Painel</h1>
+        {% if eh_familia %}
+            <p>O acompanhamento do seu filho, em números.</p>
+        {% else %}
+            <p>Como está o acompanhamento das suas turmas.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="numerao">
+    {% for item in indicadores %}
+        <div class="numerao__item">
+            <div class="numerao__valor">{{ item.valor }}</div>
+            <div class="numerao__rotulo">{{ item.rotulo }}</div>
+            <div class="numerao__nota">{{ item.nota }}</div>
+        </div>
+    {% endfor %}
+</div>
+
+<div class="grade-2" style="margin-top: 1.25rem;">
+
+    <div class="cartao">
+        <div class="cartao__topo">
+            <h2>Relatórios por turma</h2>
+            <span class="etiqueta">Últimos 30 dias</span>
+        </div>
+        <div class="cartao__corpo">
+            {% if tem_dado_por_turma %}
+                <div class="grafico"><canvas id="grafico-turmas"></canvas></div>
+            {% else %}
+                <div class="vazio vazio--dentro">
+                    <strong>Sem relatórios no período</strong>
+                    Assim que houver publicações, o gráfico aparece aqui.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="cartao">
+        <div class="cartao__topo">
+            <h2>Ritmo de publicação</h2>
+            <span class="etiqueta">Últimas 8 semanas</span>
+        </div>
+        <div class="cartao__corpo">
+            <div class="grafico"><canvas id="grafico-semanas"></canvas></div>
+        </div>
+    </div>
+
+</div>
+
+{{ grafico_turmas|json_script:"dados-turmas" }}
+{{ grafico_semanas|json_script:"dados-semanas" }}
+
+{% comment %}
+Chart.js servido pelo proprio sistema, nunca por CDN: a interface toda
+funciona sem internet, e no dia da banca a rede pode falhar.
+{% endcomment %}
+<script src="{% static 'js/chart.umd.js' %}"></script>
+<script>
+(function () {
+    const turquesa = '#159A9E';
+    const azul = '#214A78';
+    const tinta = '#5A6B72';
+
+    Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+    Chart.defaults.color = tinta;
+
+    function ler(id) {
+        return JSON.parse(document.getElementById(id).textContent);
+    }
+
+    const barras = document.getElementById('grafico-turmas');
+    if (barras) {
+        const dados = ler('dados-turmas');
+        new Chart(barras, {
+            type: 'bar',
+            data: {
+                labels: dados.rotulos,
+                datasets: [{
+                    label: 'Relatórios publicados',
+                    data: dados.valores,
+                    backgroundColor: turquesa,
+                    borderRadius: 6,
+                    maxBarThickness: 54
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                }
+            }
+        });
+    }
+
+    const linha = document.getElementById('grafico-semanas');
+    if (linha) {
+        const dados = ler('dados-semanas');
+        new Chart(linha, {
+            type: 'line',
+            data: {
+                labels: dados.rotulos,
+                datasets: [{
+                    label: 'Relatórios na semana',
+                    data: dados.valores,
+                    borderColor: azul,
+                    backgroundColor: 'rgba(33, 74, 120, .12)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: .3,
+                    pointRadius: 4,
+                    pointBackgroundColor: azul
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                }
+            }
+        });
+    }
+})();
+</script>
+
+{% endblock %}

@@ -583,6 +583,52 @@ input[type="checkbox"] {
     margin-right: .5rem;
 }
 
+/* ------------------------------------------------- 10b. PAINEL (RF12)
+   Big Numbers e graficos. A grade quebra sozinha em telas estreitas. */
+.numerao {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 1rem;
+}
+
+.numerao__item {
+    background-color: var(--papel);
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+    box-shadow: var(--sombra);
+    padding: 1.1rem 1.25rem;
+    border-top: 3px solid var(--marca-500);
+}
+
+.numerao__valor {
+    font-size: 2.4rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--marca-900);
+    font-variant-numeric: tabular-nums;
+}
+
+.numerao__rotulo {
+    margin-top: .25rem;
+    font-weight: 700;
+    font-size: .92rem;
+    color: var(--tinta);
+}
+
+.numerao__nota {
+    margin-top: .15rem;
+    font-size: .8rem;
+    color: var(--tinta-suave);
+}
+
+/* Altura fixa para o canvas: sem isso o Chart.js cresce a cada redesenho. */
+.grafico {
+    position: relative;
+    height: 260px;
+}
+
+.vazio--dentro { padding: 2rem 1rem; }
+
 /* ---------------------------------------------------------------- 11. ESTADO VAZIO */
 .vazio {
     padding: 3rem 1.5rem;
