@@ -55,7 +55,27 @@
             {% endif %}
         </div>
 
+        {% if relatorio.pode_editar or relatorio.pode_excluir %}
+            <div class="cartao__acoes">
+                {% if relatorio.pode_editar %}
+                    <a href="{% url 'editar_relatorio' relatorio.id %}"
+                       class="botao botao--claro botao--pequeno">Editar</a>
+                {% endif %}
+
+                {% if relatorio.pode_excluir %}
+                    <form method="post" action="{% url 'excluir_relatorio' relatorio.id %}"
+                          onsubmit="return confirm('Excluir este relatório? Ele deixa de aparecer para as famílias, mas continua guardado no histórico da escola.');">
+                        {% csrf_token %}
+                        <button type="submit" class="botao botao--perigo botao--pequeno">Excluir</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% endif %}
+
         <div class="cartao__rodape">
+            {% if relatorio.foi_editado %}
+                <span class="etiqueta etiqueta--editado">Editado em {{ relatorio.editado_em|date:"d/m/Y \à\s H:i" }}</span>
+            {% endif %}
             Publicado por {{ relatorio.autor.get_full_name|default:relatorio.autor }}
             em {{ relatorio.publicado_em|date:"d/m/Y \à\s H:i" }}
         </div>

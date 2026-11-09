@@ -280,6 +280,21 @@ textarea:focus-visible {
     text-align: right;
 }
 
+/* Faixa de acoes do cartao: editar e excluir (RF11). Fica acima do rodape e
+   so aparece para quem tem permissao - quem nao tem, nao ve o botao. */
+.cartao__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    justify-content: flex-end;
+    align-items: center;
+    padding: .7rem 1.5rem;
+    border-top: 1px solid var(--borda);
+    background-color: var(--fundo);
+}
+
+.cartao__acoes form { margin: 0; }
+
 /* Blocos destacados dentro de um relatorio (tarefa e observacao). */
 .bloco {
     border-radius: var(--raio-min);
@@ -556,6 +571,14 @@ input[type="checkbox"] {
 }
 
 .etiqueta--contador { background-color: #E8A417; color: #3A2A00; }
+
+/* Selo de relatorio alterado depois de publicado (RF11). Cor de aviso, nao de
+   erro: a edicao e legitima, so precisa ser visivel para quem le. */
+.etiqueta--editado {
+    background-color: var(--ambar-bg);
+    color: var(--ambar);
+    margin-right: .5rem;
+}
 
 /* ---------------------------------------------------------------- 11. ESTADO VAZIO */
 .vazio {

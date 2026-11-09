@@ -35,11 +35,44 @@ class RelatorioDiario(models.Model):  # Para representar o relatório diário de
     )
     publicado_em = models.DateTimeField(auto_now_add=True)
 
+    # --- Marca de edição (RF11) ---------------------------------------
+    # Nulo quer dizer "nunca foi editado". É a forma honesta de dizer isso
+    # no banco: uma data qualquer aqui seria mentira. Por isso tambem NAO
+    # se usa auto_now, que gravaria a data a cada save(), inclusive quando
+    # o que mudou foi so a marca de exclusao.
+    editado_em = models.DateTimeField(null=True, blank=True)
+    editado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='relatorios_editados',
+    )
+
+    # --- Exclusão lógica (RF11) ---------------------------------------
+    # O registro nao sai do banco: so deixa de aparecer. O historico
+    # sobrevive, a auditoria continua fazendo sentido e um engano pode ser
+    # desfeito.
+    excluido = models.BooleanField(default=False)
+    excluido_em = models.DateTimeField(null=True, blank=True)
+    excluido_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='relatorios_excluidos',
+    )
+
     class Meta:
         ordering = ['-data_aula']
 
     def __str__(self):
         return f'{self.turma} - {self.data_aula}'
+
+    @property
+    def foi_editado(self):
+        """Serve ao template: mostra o selo de alteracao ou nao."""
+        return self.editado_em is not None
 
 class Perfil(models.Model):
 

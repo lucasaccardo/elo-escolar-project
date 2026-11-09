@@ -15,17 +15,31 @@ from unittest.mock import patch
 from django.test import SimpleTestCase
 
 from relatorios.models import Perfil
-from relatorios.permissions import pode_publicar_relatorio, turmas_visiveis
+from relatorios.permissions import (
+    pode_editar_relatorio,
+    pode_excluir_relatorio,
+    pode_publicar_relatorio,
+    turmas_visiveis,
+)
 
 
-def usuario_com_perfil(tipo, ativo=True):
+def usuario_com_perfil(tipo, ativo=True, identificador=1):
     """Monta um usuario de mentira, sem gravar nada no banco.
 
     SimpleNamespace e um objeto simples do Python: o que eu escrevo aqui
     vira atributo dele. Para a funcao testada isso basta, porque ela so
-    consulta user.is_active e user.perfil.tipo.
+    consulta user.is_active, user.id e user.perfil.tipo.
     """
-    return SimpleNamespace(is_active=ativo, perfil=SimpleNamespace(tipo=tipo))
+    return SimpleNamespace(
+        id=identificador,
+        is_active=ativo,
+        perfil=SimpleNamespace(tipo=tipo),
+    )
+
+
+def relatorio_de(autor_id, excluido=False):
+    """Monta um relatorio de mentira: so os campos que a regra consulta."""
+    return SimpleNamespace(autor_id=autor_id, excluido=excluido)
 
 
 class PodePublicarRelatorioTest(SimpleTestCase):
@@ -65,6 +79,124 @@ class PodePublicarRelatorioTest(SimpleTestCase):
         usuario = SimpleNamespace(is_active=True)  # repare: sem perfil
 
         resultado = pode_publicar_relatorio(usuario)
+
+        self.assertFalse(resultado)
+
+
+class PodeEditarRelatorioTest(SimpleTestCase):
+    """Regra do RF11: o autor corrige o proprio, a gestao corrige qualquer um.
+
+    Esta regra e diferente das outras do arquivo porque depende de DUAS
+    coisas ao mesmo tempo: quem e a pessoa e qual e o relatorio. Por isso a
+    funcao recebe dois argumentos.
+    """
+
+    def test_coordenador_edita_relatorio_de_outra_pessoa(self):
+        # Caminho feliz da gestao: o id do autor nem importa aqui.
+        coordenador = usuario_com_perfil(
+            Perfil.Tipo.COORDENADOR, identificador=7,
+        )
+        relatorio = relatorio_de(autor_id=99)
+
+        resultado = pode_editar_relatorio(coordenador, relatorio)
+
+        self.assertTrue(resultado)
+
+    def test_professor_edita_o_proprio_relatorio(self):
+        # Caminho feliz do professor: o id dele bate com o autor_id.
+        professora = usuario_com_perfil(Perfil.Tipo.PROFESSOR, identificador=5)
+        relatorio = relatorio_de(autor_id=5)
+
+        resultado = pode_editar_relatorio(professora, relatorio)
+
+        self.assertTrue(resultado)
+
+    def test_professor_nao_edita_relatorio_de_outro_professor(self):
+        # Violacao de regra: mesmo perfil, mesmo direito de publicar, e
+        # ainda assim nao pode mexer no texto que outra pessoa assinou.
+        professora = usuario_com_perfil(Perfil.Tipo.PROFESSOR, identificador=5)
+        relatorio = relatorio_de(autor_id=6)
+
+        resultado = pode_editar_relatorio(professora, relatorio)
+
+        self.assertFalse(resultado)
+
+    def test_relatorio_sem_autor_gravado_nao_libera_ninguem(self):
+        # Caso-limite: se autor_id for nulo e o id do usuario tambem fosse,
+        # uma comparacao ingenua daria True e liberaria qualquer professor.
+        professora = usuario_com_perfil(
+            Perfil.Tipo.PROFESSOR, identificador=None,
+        )
+        relatorio = relatorio_de(autor_id=None)
+
+        resultado = pode_editar_relatorio(professora, relatorio)
+
+        self.assertFalse(resultado)
+
+    def test_relatorio_excluido_nao_pode_ser_editado(self):
+        # Fronteira da regra: o unico campo que muda e o excluido.
+        coordenador = usuario_com_perfil(Perfil.Tipo.COORDENADOR)
+        relatorio = relatorio_de(autor_id=99, excluido=True)
+
+        resultado = pode_editar_relatorio(coordenador, relatorio)
+
+        self.assertFalse(resultado)
+
+    def test_responsavel_nao_edita_relatorio_nenhum(self):
+        # "Negue por padrao": o responsavel le, nunca escreve.
+        responsavel = usuario_com_perfil(
+            Perfil.Tipo.RESPONSAVEL, identificador=3,
+        )
+        relatorio = relatorio_de(autor_id=3)  # de proposito: o mesmo id
+
+        resultado = pode_editar_relatorio(responsavel, relatorio)
+
+        self.assertFalse(resultado)
+
+    def test_usuario_sem_perfil_nao_edita(self):
+        usuario = SimpleNamespace(id=1, is_active=True)  # repare: sem perfil
+
+        resultado = pode_editar_relatorio(usuario, relatorio_de(autor_id=1))
+
+        self.assertFalse(resultado)
+
+
+class PodeExcluirRelatorioTest(SimpleTestCase):
+    """Regra do RF11: excluir e decisao de gestao, nao do autor."""
+
+    def test_diretor_pode_excluir(self):
+        diretor = usuario_com_perfil(Perfil.Tipo.DIRETOR)
+
+        resultado = pode_excluir_relatorio(diretor, relatorio_de(autor_id=99))
+
+        self.assertTrue(resultado)
+
+    def test_professor_nao_exclui_nem_o_proprio_relatorio(self):
+        # Esta e a diferenca entre editar e excluir, e a banca pode perguntar
+        # por que: corrigir o proprio texto e trabalho do professor; tirar do
+        # ar algo que as familias ja leram e decisao da escola.
+        professora = usuario_com_perfil(Perfil.Tipo.PROFESSOR, identificador=5)
+
+        resultado = pode_excluir_relatorio(
+            professora, relatorio_de(autor_id=5),
+        )
+
+        self.assertFalse(resultado)
+
+    def test_relatorio_ja_excluido_nao_e_excluido_de_novo(self):
+        coordenador = usuario_com_perfil(Perfil.Tipo.COORDENADOR)
+        relatorio = relatorio_de(autor_id=99, excluido=True)
+
+        resultado = pode_excluir_relatorio(coordenador, relatorio)
+
+        self.assertFalse(resultado)
+
+    def test_coordenador_com_conta_desativada_nao_exclui(self):
+        coordenador = usuario_com_perfil(Perfil.Tipo.COORDENADOR, ativo=False)
+
+        resultado = pode_excluir_relatorio(
+            coordenador, relatorio_de(autor_id=9),
+        )
 
         self.assertFalse(resultado)
 

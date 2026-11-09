@@ -20,6 +20,7 @@ from django.test import LiveServerTestCase, TestCase
 from django.urls import reverse
 
 from acessos.models import VERSAO_TERMOS, AceiteTermos
+from auditoria.models import Evento
 from relatorios.models import Aluno, Perfil, RelatorioDiario, Turma
 
 User = get_user_model()
@@ -213,6 +214,183 @@ class CadastrarRelatorioTest(BaseDeIntegracao):
 
         self.assertEqual(resposta.status_code, 302)
         self.assertIn(reverse('login'), resposta['Location'])
+
+
+class EditarExcluirRelatorioTest(BaseDeIntegracao):
+    """RF11 — editar e excluir relatorio ja publicado.
+
+    Tres regras de negocio atravessadas aqui: quem corrige (autor e gestao),
+    como se exclui (logicamente, sem apagar a linha) e o aviso de alteracao
+    na tela de quem le.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.relatorio = RelatorioDiario.objects.create(
+            turma=self.turma,
+            data_aula=date(2026, 11, 3),
+            conteudo='Adicao com reserva',
+            autor=self.professora,
+        )
+
+    def url_editar(self):
+        return reverse('editar_relatorio', args=[self.relatorio.id])
+
+    def url_excluir(self):
+        return reverse('excluir_relatorio', args=[self.relatorio.id])
+
+    def dados_corrigidos(self, **troca):
+        dados = {
+            'turma': self.turma.id,
+            'data_aula': '2026-11-03',
+            'conteudo': 'Adicao com reserva e problemas do cotidiano',
+            'tarefa_descricao': '',
+            'tarefa_data_entrega': '',
+            'observacoes': '',
+        }
+        dados.update(troca)
+        return dados
+
+    def test_professora_abre_o_formulario_com_o_texto_atual(self):
+        # Caminho feliz do GET: o formulario tem de vir preenchido, senao a
+        # pessoa reescreveria tudo do zero.
+        self.entrar_como(self.professora)
+
+        resposta = self.client.get(self.url_editar())
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, 'Adicao com reserva')
+
+    def test_professora_corrige_o_proprio_relatorio(self):
+        # Caminho feliz do POST, com efeito persistido: o texto muda no banco
+        # e a marca de alteracao e gravada.
+        self.entrar_como(self.professora)
+
+        resposta = self.client.post(self.url_editar(), self.dados_corrigidos())
+
+        self.assertEqual(resposta.status_code, 302)
+        self.assertEqual(resposta['Location'], reverse('lista_relatorios'))
+
+        self.relatorio.refresh_from_db()
+        self.assertEqual(
+            self.relatorio.conteudo,
+            'Adicao com reserva e problemas do cotidiano',
+        )
+        self.assertIsNotNone(self.relatorio.editado_em)
+        self.assertEqual(self.relatorio.editado_por, self.professora)
+
+    def test_coordenador_corrige_relatorio_de_outra_pessoa(self):
+        # A gestao corrige qualquer um, e a autoria original nao muda.
+        self.entrar_como(self.coordenador)
+
+        resposta = self.client.post(self.url_editar(), self.dados_corrigidos())
+
+        self.assertEqual(resposta.status_code, 302)
+
+        self.relatorio.refresh_from_db()
+        self.assertEqual(self.relatorio.editado_por, self.coordenador)
+        self.assertEqual(self.relatorio.autor, self.professora)
+
+    def test_responsavel_nao_abre_a_edicao(self):
+        # Seguranca: autenticado, porem sem permissao para esta acao.
+        self.entrar_como(self.responsavel)
+
+        resposta = self.client.get(self.url_editar())
+
+        self.assertEqual(resposta.status_code, 403)
+        self.assertContains(resposta, 'Forbidden', status_code=403)
+
+    def test_o_selo_de_alteracao_aparece_na_lista(self):
+        # A terceira regra de negocio, vista pelos olhos de quem le.
+        self.entrar_como(self.professora)
+        self.client.post(self.url_editar(), self.dados_corrigidos())
+
+        resposta = self.client.get(reverse('lista_relatorios'))
+
+        self.assertContains(resposta, 'Editado em')
+
+    def test_relatorio_novo_nao_mostra_selo_de_alteracao(self):
+        # O contraponto do teste acima: sem edicao, nada de selo.
+        self.entrar_como(self.professora)
+
+        resposta = self.client.get(reverse('lista_relatorios'))
+
+        self.assertNotContains(resposta, 'Editado em')
+
+    def test_excluir_por_get_e_recusado_com_405(self):
+        # Cenario de erro: acao que muda o estado do sistema nao acontece por
+        # um endereco digitado na barra do navegador.
+        self.entrar_como(self.coordenador)
+
+        resposta = self.client.get(self.url_excluir())
+
+        self.assertEqual(resposta.status_code, 405)
+
+    def test_coordenador_exclui_e_o_registro_continua_no_banco(self):
+        # O coracao da exclusao logica: some da tela, permanece no banco com
+        # a data e o nome de quem excluiu.
+        self.entrar_como(self.coordenador)
+
+        resposta = self.client.post(self.url_excluir())
+
+        self.assertEqual(resposta.status_code, 302)
+        self.assertEqual(resposta['Location'], reverse('lista_relatorios'))
+
+        self.assertTrue(
+            RelatorioDiario.objects.filter(pk=self.relatorio.pk).exists(),
+            'a linha nao pode sair do banco: a exclusao e logica',
+        )
+        self.relatorio.refresh_from_db()
+        self.assertTrue(self.relatorio.excluido)
+        self.assertIsNotNone(self.relatorio.excluido_em)
+        self.assertEqual(self.relatorio.excluido_por, self.coordenador)
+
+        lista = self.client.get(reverse('lista_relatorios'))
+        self.assertNotContains(lista, 'Adicao com reserva')
+
+    def test_professora_nao_exclui_nem_o_proprio_relatorio(self):
+        # Seguranca: corrigir e do autor, retirar do ar e da gestao.
+        self.entrar_como(self.professora)
+
+        resposta = self.client.post(self.url_excluir())
+
+        self.assertEqual(resposta.status_code, 403)
+
+        self.relatorio.refresh_from_db()
+        self.assertFalse(self.relatorio.excluido)
+
+    def test_editar_relatorio_ja_excluido_devolve_404(self):
+        # Cenario de erro: para quem edita, o relatorio excluido simplesmente
+        # nao existe mais.
+        self.relatorio.excluido = True
+        self.relatorio.save(update_fields=['excluido'])
+        self.entrar_como(self.coordenador)
+
+        resposta = self.client.get(self.url_editar())
+
+        self.assertEqual(resposta.status_code, 404)
+
+    def test_a_auditoria_registra_a_edicao_e_a_exclusao(self):
+        # Rastreabilidade: as duas acoes novas precisam deixar marca no log.
+        self.entrar_como(self.coordenador)
+
+        self.client.post(self.url_editar(), self.dados_corrigidos())
+        self.client.post(self.url_excluir())
+
+        self.assertEqual(
+            Evento.objects.filter(
+                acao=Evento.Acao.RELATORIO_EDITADO,
+                usuario=self.coordenador,
+            ).count(),
+            1,
+        )
+        self.assertEqual(
+            Evento.objects.filter(
+                acao=Evento.Acao.RELATORIO_EXCLUIDO,
+                usuario=self.coordenador,
+            ).count(),
+            1,
+        )
 
 
 class SemRedirecionar(urllib.request.HTTPErrorProcessor):

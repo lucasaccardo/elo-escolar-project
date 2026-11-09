@@ -10,6 +10,8 @@ class Evento(models.Model):
         ACESSO_APROVADO = 'ACESSO_APROVADO', 'Aprovou pedido de acesso'
         ACESSO_RECUSADO = 'ACESSO_RECUSADO', 'Recusou pedido de acesso'
         RELATORIO_PUBLICADO = 'RELATORIO_PUBLICADO', 'Publicou relatório'
+        RELATORIO_EDITADO = 'RELATORIO_EDITADO', 'Editou relatório'
+        RELATORIO_EXCLUIDO = 'RELATORIO_EXCLUIDO', 'Excluiu relatório'
         EMAIL = 'EMAIL', 'Aviso por e-mail'
         TERMOS_ACEITOS = 'TERMOS_ACEITOS', 'Aceitou os termos de uso'
         
