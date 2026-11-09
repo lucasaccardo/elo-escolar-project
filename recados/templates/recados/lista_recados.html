@@ -1,0 +1,59 @@
+{% extends 'relatorios/base.html' %}
+
+{% block titulo %}Recados - Elo Escolar{% endblock %}
+
+{% block conteudo %}
+
+<div class="cabecalho-pagina">
+    <div>
+        <h1>Recados</h1>
+        <p>Avisos da escola e das turmas, em um lugar só.</p>
+    </div>
+
+    {% if pode_publicar_recado %}
+        <a href="{% url 'cadastrar_recado' %}" class="botao botao--principal">Publicar recado</a>
+    {% endif %}
+</div>
+
+{% for recado in recados %}
+    <div class="cartao">
+
+        <div class="cartao__topo">
+            <h2>{{ recado.titulo }}</h2>
+            {% if recado.eh_geral %}
+                <span class="etiqueta etiqueta--geral">Escola inteira</span>
+            {% else %}
+                <span class="etiqueta">{{ recado.turma.nome }}</span>
+            {% endif %}
+        </div>
+
+        <div class="cartao__corpo">
+            <p>{{ recado.mensagem|linebreaksbr }}</p>
+
+            {% if recado.exibir_ate %}
+                <div class="bloco bloco--tarefa">
+                    {% if recado.esta_no_ar %}
+                        <strong>No mural até</strong> {{ recado.exibir_ate|date:"d/m/Y" }}
+                    {% else %}
+                        <strong>Encerrado em</strong> {{ recado.exibir_ate|date:"d/m/Y" }} —
+                        as famílias não veem mais este recado.
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="cartao__rodape">
+            Publicado por {{ recado.autor.get_full_name|default:recado.autor }}
+            em {{ recado.publicado_em|date:"d/m/Y \à\s H:i" }}
+        </div>
+
+    </div>
+
+{% empty %}
+    <div class="vazio">
+        <strong>Nenhum recado no mural</strong>
+        Assim que a escola publicar um aviso, ele aparece aqui.
+    </div>
+{% endfor %}
+
+{% endblock %}

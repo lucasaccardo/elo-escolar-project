@@ -1,3 +1,4 @@
+from recados.permissions import pode_publicar_recado
 from relatorios.permissions import obter_perfil, pode_publicar_relatorio
 
 from .models import SolicitacaoAcesso
@@ -16,6 +17,7 @@ def menu_acessos(request):
     dados = {
         'perfil_tipo': perfil.get_tipo_display() if perfil else '',
         'pode_publicar': pode_publicar_relatorio(usuario),
+        'pode_publicar_recado': pode_publicar_recado(usuario),
         'mostrar_pedidos': pode_aprovar_acessos(usuario),
         'pedidos_pendentes': 0,
     }

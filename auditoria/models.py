@@ -12,6 +12,7 @@ class Evento(models.Model):
         RELATORIO_PUBLICADO = 'RELATORIO_PUBLICADO', 'Publicou relatório'
         RELATORIO_EDITADO = 'RELATORIO_EDITADO', 'Editou relatório'
         RELATORIO_EXCLUIDO = 'RELATORIO_EXCLUIDO', 'Excluiu relatório'
+        RECADO_PUBLICADO = 'RECADO_PUBLICADO', 'Publicou recado'
         EMAIL = 'EMAIL', 'Aviso por e-mail'
         TERMOS_ACEITOS = 'TERMOS_ACEITOS', 'Aceitou os termos de uso'
         

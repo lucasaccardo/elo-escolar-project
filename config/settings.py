@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'relatorios',
     'acessos',
     'auditoria',
+    'recados',
 ]
 
 MIDDLEWARE = [
