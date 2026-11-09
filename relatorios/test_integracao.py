@@ -74,14 +74,17 @@ class PaginaInicialTest(BaseDeIntegracao):
         self.assertTemplateUsed(resposta, 'relatorios/inicio.html')
         self.assertContains(resposta, 'Elo Escolar')
 
-    def test_quem_ja_entrou_e_levado_para_o_diario(self):
+    def test_quem_ja_entrou_e_levado_para_o_painel(self):
         # Caminho feliz com redirecionamento: confere o header Location.
+        # Ate o RF12 o destino era a lista de relatorios. Com o painel
+        # pronto, ele passou a ser a primeira tela de quem tem sessao, e
+        # este teste foi atualizado junto com a mudanca.
         self.entrar_como(self.professora)
 
         resposta = self.client.get(reverse('inicio'))
 
         self.assertEqual(resposta.status_code, 302)
-        self.assertEqual(resposta['Location'], reverse('lista_relatorios'))
+        self.assertEqual(resposta['Location'], reverse('painel'))
 
 
 class ListaRelatoriosTest(BaseDeIntegracao):

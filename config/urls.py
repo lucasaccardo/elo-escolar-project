@@ -17,5 +17,6 @@ urlpatterns = [
     path('contas/', include('django.contrib.auth.urls')),
     path('acessos/', include('acessos.urls')),
     path('recados/', include('recados.urls')),
+    path('painel/', include('painel.urls')),
     path('', include('relatorios.urls')),
 ]

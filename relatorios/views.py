@@ -22,7 +22,7 @@ from .permissions import (
 def pagina_inicial(request):
     # Vitrine publica. Quem ja esta logado nao precisa dela: vai direto ao sistema.
     if request.user.is_authenticated:
-        return redirect('lista_relatorios')
+        return redirect('painel')
     return render(request, 'relatorios/inicio.html')
 
 

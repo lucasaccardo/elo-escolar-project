@@ -15,7 +15,7 @@
     {% if user.is_authenticated %}
     <aside class="lateral">
 
-        <a class="marca" href="{% url 'lista_relatorios' %}">
+        <a class="marca" href="{% url 'painel' %}">
             <img src="{% static 'img/logo-elo.png' %}" alt="">
             <span>Elo Escolar</span>
         </a>
@@ -23,6 +23,15 @@
         <nav class="nav">
 
             <div class="nav__titulo">Acompanhamento</div>
+
+            <a class="nav__item {% if request.resolver_match.url_name == 'painel' %}nav__item--ativo{% endif %}"
+               href="{% url 'painel' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 13h6V3H3zM15 21h6V11h-6zM3 21h6v-5H3zM15 8h6V3h-6z"/>
+                </svg>
+                Painel
+            </a>
 
             <a class="nav__item {% if request.resolver_match.url_name == 'lista_relatorios' %}nav__item--ativo{% endif %}"
                href="{% url 'lista_relatorios' %}">

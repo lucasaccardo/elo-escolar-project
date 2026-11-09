@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'acessos',
     'auditoria',
     'recados',
+    'painel',
 ]
 
 MIDDLEWARE = [
@@ -128,5 +129,5 @@ MAILERS = {
 }
 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'lista_relatorios'
+LOGIN_REDIRECT_URL = 'painel'
 LOGOUT_REDIRECT_URL = 'login'
