@@ -572,6 +572,9 @@ input[type="checkbox"] {
 
 .etiqueta--contador { background-color: #E8A417; color: #3A2A00; }
 
+/* Recado dirigido a escola inteira (RF09). */
+.etiqueta--geral { background-color: var(--azul-900); color: #fff; }
+
 /* Selo de relatorio alterado depois de publicado (RF11). Cor de aviso, nao de
    erro: a edicao e legitima, so precisa ser visivel para quem le. */
 .etiqueta--editado {
