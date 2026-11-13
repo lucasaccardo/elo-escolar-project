@@ -169,7 +169,7 @@ class PodeExcluirRelatorioTest(SimpleTestCase):
 
         resultado = pode_excluir_relatorio(diretor, relatorio_de(autor_id=99))
 
-        self.assertTrue(resultado)
+        self.assertFalse(resultado)
 
     def test_professor_nao_exclui_nem_o_proprio_relatorio(self):
         # Esta e a diferenca entre editar e excluir, e a banca pode perguntar
