@@ -25,6 +25,7 @@ class RelatorioDiarioForm(forms.ModelForm):
             'tarefa_data_entrega': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'observacoes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Sem isto o Django escreve "- Select an option -", em ingles, no

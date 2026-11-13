@@ -15,7 +15,7 @@ class Evento(models.Model):
         RECADO_PUBLICADO = 'RECADO_PUBLICADO', 'Publicou recado'
         EMAIL = 'EMAIL', 'Aviso por e-mail'
         TERMOS_ACEITOS = 'TERMOS_ACEITOS', 'Aceitou os termos de uso'
-        
+
     acao = models.CharField(max_length=30, choices=Acao.choices)
     # SET_NULL: se a conta for eliminada, a linha do log continua,
     # só que sem apontar para ninguém.
