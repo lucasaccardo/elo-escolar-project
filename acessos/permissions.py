@@ -30,6 +30,7 @@ def solicitacoes_que_pode_analisar(user):
         aluno__turma__in=turmas_visiveis(user)
     )
 
+
 def aceitou_termos(user):
     # Negue por padrao: sem registro da versao vigente, nao aceitou.
     return AceiteTermos.objects.filter(

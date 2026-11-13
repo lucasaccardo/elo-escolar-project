@@ -1,0 +1,124 @@
+name: CI
+
+# Gatilho: toda vez que um Pull Request para a branch principal e aberto ou
+# recebe um commit novo. A verificacao acontece ANTES da revisao humana, que e
+# justamente o ponto: teste que depende de alguem lembrar de rodar e uma boa
+# intencao, nao uma garantia.
+on:
+  pull_request:
+    branches: [main]
+
+# Permissao minima: a pipeline so precisa ler o codigo do repositorio. Nao
+# escreve, nao publica, nao comenta.
+permissions:
+  contents: read
+
+jobs:
+
+  # --------------------------------------------------------------------
+  # Checagem 1 de 3
+  # --------------------------------------------------------------------
+  testes-unitarios:
+    name: Testes unitários
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Preparar o Python
+        uses: actions/setup-python@v5
+        with:
+          # Mesma versao usada no desenvolvimento do projeto.
+          python-version: '3.12'
+          # Cache das dependencias: nas execucoes seguintes o pip reaproveita
+          # os pacotes em vez de baixar tudo de novo.
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Instalar as dependências
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Gerar chave efêmera do ambiente de teste
+        # O Django exige uma SECRET_KEY para iniciar. Esta e gerada na hora, so
+        # para esta execucao, e descartada junto com a maquina. Nao e um
+        # segredo: nao existe nada assinado com ela que sobreviva ao job. Por
+        # isso nenhuma chave de verdade precisa aparecer no workflow.
+        run: |
+          echo "SECRET_KEY=$(python -c 'from django.core.management.utils import get_random_secret_key as k; print(k())')" >> "$GITHUB_ENV"
+
+      - name: Executar somente os testes unitários
+        # --exclude-tag=integracao deixa de fora tudo que foi marcado como
+        # teste de integracao. Sobram apenas os unitarios, que herdam de
+        # SimpleTestCase e sao PROIBIDOS pelo proprio Django de tocar no banco.
+        run: python manage.py test --exclude-tag=integracao --verbosity=2
+        env:
+          DEBUG: 'False'
+
+  # --------------------------------------------------------------------
+  # Checagem 2 de 3
+  # --------------------------------------------------------------------
+  testes-integracao:
+    name: Testes de integração
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Preparar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Instalar as dependências
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Gerar chave efêmera do ambiente de teste
+        run: |
+          echo "SECRET_KEY=$(python -c 'from django.core.management.utils import get_random_secret_key as k; print(k())')" >> "$GITHUB_ENV"
+
+      - name: Executar somente os testes de integração
+        # --tag=integracao e o espelho do passo anterior: roda apenas o grupo
+        # de integracao, e nenhum unitario. O banco de teste e criado e
+        # destruido pelo proprio executor do Django, isolado do banco de
+        # desenvolvimento, e cada teste roda numa transacao desfeita ao fim.
+        run: python manage.py test --tag=integracao --verbosity=2
+        env:
+          DEBUG: 'False'
+
+  # --------------------------------------------------------------------
+  # Checagem 3 de 3
+  # --------------------------------------------------------------------
+  linter:
+    name: Linter
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Preparar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Instalar o flake8
+        run: pip install flake8==7.5.0
+
+      - name: Analisar o código-fonte
+        # As regras vivem no setup.cfg, versionado no repositorio, de modo que
+        # a mesma verificacao vale na maquina de quem desenvolve e aqui.
+        # Nenhuma regra desligada e nenhum "|| true": se houver violacao, o
+        # flake8 devolve codigo de saida diferente de zero e a checagem reprova.
+        run: flake8 .

@@ -49,9 +49,11 @@ class SolicitacaoAcesso(models.Model):
     def __str__(self):
         return f'{self.usuario} - {self.aluno} ({self.get_status_display()})'
 
+
 # Versao vigente dos Termos de Uso. Trocar esta linha quando o texto mudar
 # faz o sistema pedir um novo aceite a todo mundo.
 VERSAO_TERMOS = '2026-09-21'
+
 
 class AceiteTermos(models.Model):
     """Prova de que um usuario aceitou os Termos, e de qual versao."""

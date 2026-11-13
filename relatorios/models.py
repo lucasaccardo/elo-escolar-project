@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 
+
 class Turma(models.Model):  # Para representar uma turma de alunos
     nome = models.CharField(max_length=100)
     ano_letivo = models.IntegerField()
@@ -13,6 +14,7 @@ class Turma(models.Model):  # Para representar uma turma de alunos
     def __str__(self):
         return self.nome
 
+
 class Aluno(models.Model):
     nome_completo = models.CharField(max_length=255)
     rgm = models.CharField(max_length=20, unique=True)
@@ -20,6 +22,7 @@ class Aluno(models.Model):
 
     def __str__(self):
         return f"{self.nome_completo} (RGM: {self.rgm})"
+
 
 class RelatorioDiario(models.Model):  # Para representar o relatório diário de uma turma
     turma = models.ForeignKey(Turma, on_delete=models.PROTECT)
@@ -73,6 +76,7 @@ class RelatorioDiario(models.Model):  # Para representar o relatório diário de
     def foi_editado(self):
         """Serve ao template: mostra o selo de alteracao ou nao."""
         return self.editado_em is not None
+
 
 class Perfil(models.Model):
 

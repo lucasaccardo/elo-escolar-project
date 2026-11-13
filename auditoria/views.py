@@ -1,3 +1,2 @@
-from django.shortcuts import render
-
-# Create your views here.
+# Este aplicativo nao tem telas proprias: a consulta ao log de auditoria e
+# feita pelo painel administrativo do Django, em modo somente leitura.
