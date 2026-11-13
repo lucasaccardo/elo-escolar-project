@@ -12,7 +12,7 @@ from datetime import date
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, tag
 from django.urls import reverse
 
 from acessos.models import VERSAO_TERMOS, AceiteTermos, SolicitacaoAcesso
@@ -21,6 +21,9 @@ from relatorios.models import Aluno, Perfil, RelatorioDiario, Turma
 User = get_user_model()
 
 
+# A etiqueta vale tambem para as classes que herdam desta: no Django, a
+# marcacao e herdada pelas subclasses. Por isso basta etiquetar a base.
+@tag('integracao')
 class BaseDeAcesso(TestCase):
 
     def setUp(self):
