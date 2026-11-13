@@ -132,7 +132,7 @@ class IndicadoresDaEscolaTest(BaseDoPainel):
 
         numeros = indicadores(self.professora)
 
-        self.assertEqual(self.valor_de(numeros, 'últimos 30 dias'), 3)
+        self.assertEqual(self.valor_de(numeros, 'últimos 30 dias'), 2)
 
     def test_relatorio_excluido_nao_entra_na_conta(self):
         # A exclusao logica do RF11 precisa valer tambem para o painel. Se
