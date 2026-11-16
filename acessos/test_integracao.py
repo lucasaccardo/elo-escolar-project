@@ -14,8 +14,14 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
-from acessos.models import VERSAO_TERMOS, AceiteTermos, SolicitacaoAcesso
+from acessos.models import (
+    VERSAO_TERMOS,
+    AceiteTermos,
+    ConfirmacaoEmail,
+    SolicitacaoAcesso,
+)
 from relatorios.models import Aluno, Perfil, RelatorioDiario, Turma
 
 User = get_user_model()
@@ -59,6 +65,19 @@ class BaseDeAcesso(TestCase):
         dados.update(troca)
         return dados
 
+    def confirmar_o_email(self, usuario):
+        """Marca o e-mail como confirmado sem passar pela tela (RF14).
+
+        A fila de aprovacao so mostra pedido de e-mail confirmado. Nos
+        testes que nao sao sobre o RF14, esse passo e so pre-condicao, e
+        entao e feito direto no banco para nao embaralhar o que esta
+        sendo verificado.
+        """
+        confirmacao, _ = ConfirmacaoEmail.gerar(usuario)
+        confirmacao.confirmado_em = timezone.now()
+        confirmacao.save(update_fields=['confirmado_em'])
+        return confirmacao
+
 
 class PaginasPublicasTest(BaseDeAcesso):
     """As telas que qualquer pessoa abre, sem conta."""
@@ -91,13 +110,16 @@ class CadastroResponsavelTest(BaseDeAcesso):
         self.assertEqual(resposta.status_code, 200)
         self.assertContains(resposta, 'RGM do aluno')
 
-    def test_cadastro_valido_grava_conta_pedido_e_aceite(self):
+    @patch('acessos.views.enviar_email', return_value=(True, 'HTTP 201'))
+    def test_cadastro_valido_grava_conta_pedido_e_aceite(self, _email):
         # Caminho feliz com EFEITO PERSISTIDO: uma requisicao HTTP grava em
         # tres tabelas diferentes, dentro da mesma transacao.
         resposta = self.client.post(reverse('cadastro'), self.dados_do_cadastro())
 
         self.assertEqual(resposta.status_code, 302)
-        self.assertEqual(resposta['Location'], reverse('cadastro_enviado'))
+        # Desde o RF14 o cadastro nao termina no "pedido enviado": antes
+        # disso a pessoa precisa provar que o e-mail e dela.
+        self.assertEqual(resposta['Location'], reverse('confirmar_email'))
 
         conta = User.objects.get(username='ana.souza@example.com')
         # A conta nasce DESLIGADA: existe, mas nao entra.
@@ -121,7 +143,8 @@ class CadastroResponsavelTest(BaseDeAcesso):
         self.assertContains(resposta, 'RGM não encontrado')
         self.assertFalse(User.objects.filter(username='ana.souza@example.com').exists())
 
-    def test_email_repetido_nao_cria_segunda_conta(self):
+    @patch('acessos.views.enviar_email', return_value=(True, 'HTTP 201'))
+    def test_email_repetido_nao_cria_segunda_conta(self, _email):
         # Cenario de erro: o e-mail vira nome de usuario, entao nao repete.
         self.client.post(reverse('cadastro'), self.dados_do_cadastro())
 
@@ -217,6 +240,7 @@ class FilaDeAprovacaoTest(BaseDeAcesso):
             usuario=self.candidata, aluno=self.aluno,
             aceite_termos_em='2026-11-02 10:00:00+00:00',
         )
+        self.confirmar_o_email(self.candidata)
 
     def test_coordenador_ve_a_fila(self):
         self.client.force_login(self.coordenador)
@@ -225,6 +249,21 @@ class FilaDeAprovacaoTest(BaseDeAcesso):
 
         self.assertEqual(resposta.status_code, 200)
         self.assertContains(resposta, 'Ana')
+
+    def test_pedido_de_email_nao_confirmado_nao_aparece_na_fila(self):
+        # RF14. A escola nao gasta tempo analisando cadastro cujo endereco
+        # pode estar errado - e nao aprova um acesso cujo aviso de
+        # aprovacao nunca chegaria a ninguem.
+        ConfirmacaoEmail.objects.filter(usuario=self.candidata).update(
+            confirmado_em=None,
+        )
+        self.client.force_login(self.coordenador)
+
+        resposta = self.client.get(reverse('fila_aprovacao'))
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertNotContains(resposta, 'Ana')
+        self.assertContains(resposta, 'Nenhum pedido esperando')
 
     def test_responsavel_nao_abre_a_fila(self):
         # Seguranca: usuario autenticado, sem permissao para este recurso.
@@ -339,6 +378,10 @@ class FluxoCompletoTest(BaseDeAcesso):
         self.client.post(reverse('cadastro'), self.dados_do_cadastro())
         mae = User.objects.get(username='ana.souza@example.com')
         pedido = SolicitacaoAcesso.objects.get(usuario=mae)
+
+        # 2b. Ela digita na tela o codigo que chegou por e-mail. So depois
+        # disso o pedido entra na fila da escola.
+        self.confirmar_o_email(mae)
 
         # 3. Antes da aprovacao, ela nao entra: a conta esta desligada.
         self.assertFalse(

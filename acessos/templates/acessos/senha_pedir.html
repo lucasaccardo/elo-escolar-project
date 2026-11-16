@@ -1,0 +1,62 @@
+{% extends 'relatorios/base.html' %}
+{% load static %}
+
+{% block titulo %}Esqueci minha senha - Elo Escolar{% endblock %}
+
+{% block corpo_classe %}pagina-entrada{% endblock %}
+
+{% block lateral %}{% endblock %}
+
+{% block conteudo %}
+
+<div class="entrada">
+
+    <a class="voltar" href="{% url 'login' %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Voltar para a tela de entrada
+    </a>
+
+    <div class="entrada__marca">
+        <img src="{% static 'img/logo-elo-completo.png' %}" alt="Elo Escolar">
+    </div>
+
+    <h1 class="entrada__titulo">Esqueci minha senha</h1>
+    <p class="entrada__subtitulo">
+        Informe o e-mail cadastrado. Enviaremos uma ligação para você criar
+        uma senha nova.
+    </p>
+
+    <div class="cartao">
+        <div class="cartao__corpo">
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="campo">
+                    <label for="{{ form.email.id_for_label }}">E-mail cadastrado</label>
+                    {{ form.email }}
+                    {% for erro in form.email.errors %}
+                        <div class="erro-campo">{{ erro }}</div>
+                    {% endfor %}
+                </div>
+
+                <div style="margin-top: 1.4rem;">
+                    <button type="submit" class="botao botao--principal botao--largo">
+                        Enviar ligação de redefinição
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <p class="entrada__pe">
+        Lembrou a senha? <a href="{% url 'login' %}">Entrar</a>
+    </p>
+
+</div>
+
+{% endblock %}

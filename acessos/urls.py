@@ -4,6 +4,10 @@ from . import views
 
 urlpatterns = [
     path('cadastro/', views.cadastro_responsavel, name='cadastro'),
+    path('cadastro/confirmar/', views.confirmar_email,
+         name='confirmar_email'),
+    path('cadastro/confirmar/reenviar/', views.reenviar_codigo,
+         name='reenviar_codigo'),
     path('cadastro/enviado/', views.cadastro_enviado, name='cadastro_enviado'),
     path('termos/', views.termos_de_uso, name='termos'),
     path('termos/aceitar/', views.aceitar_termos, name='aceitar_termos'),

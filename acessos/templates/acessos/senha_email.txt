@@ -1,0 +1,15 @@
+{% autoescape off %}Olá.
+
+Alguém pediu a redefinição da senha da conta {{ user.get_username }} no Elo Escolar.
+
+Para criar uma senha nova, abra o endereço abaixo:
+
+{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
+
+Esta ligação vale por tempo limitado e só pode ser usada uma vez.
+
+Se não foi você quem pediu, ignore esta mensagem: nada muda e a sua senha
+atual continua valendo.
+
+Elo Escolar
+{% endautoescape %}

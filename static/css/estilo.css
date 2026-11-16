@@ -582,6 +582,9 @@ input[type="checkbox"] {
 .etiqueta--respondida { background-color: var(--marca-100); color: var(--marca-900); }
 .etiqueta--encerrada  { background-color: #ECEFEF; color: var(--tinta-suave); }
 
+/* Link discreto alinhado a direita, sob o campo de senha (RF13). */
+.campo__ajuda-direita { text-align: right; margin-top: -.35rem; font-size: .88rem; }
+
 /* Selo de relatorio alterado depois de publicado (RF11). Cor de aviso, nao de
    erro: a edicao e legitima, so precisa ser visivel para quem le. */
 .etiqueta--editado {

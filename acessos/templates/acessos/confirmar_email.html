@@ -1,0 +1,58 @@
+{% extends 'relatorios/base.html' %}
+{% load static %}
+
+{% block titulo %}Confirmar e-mail - Elo Escolar{% endblock %}
+
+{% block corpo_classe %}pagina-entrada{% endblock %}
+
+{% block lateral %}{% endblock %}
+
+{% block conteudo %}
+
+<div class="entrada">
+
+    <div class="entrada__marca">
+        <img src="{% static 'img/logo-elo-completo.png' %}" alt="Elo Escolar">
+    </div>
+
+    <h1 class="entrada__titulo">Confirme seu e-mail</h1>
+    <p class="entrada__subtitulo">
+        Enviamos um código de seis dígitos para <strong>{{ email }}</strong>.
+        Ele vale por {{ validade }} minutos.
+    </p>
+
+    <div class="cartao">
+        <div class="cartao__corpo">
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="campo">
+                    <label for="{{ form.codigo.id_for_label }}">{{ form.codigo.label }}</label>
+                    {{ form.codigo }}
+                    {% for erro in form.codigo.errors %}
+                        <div class="erro-campo">{{ erro }}</div>
+                    {% endfor %}
+                </div>
+
+                <div style="margin-top: 1.4rem;">
+                    <button type="submit" class="botao botao--principal botao--largo">
+                        Confirmar e-mail
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <form method="post" action="{% url 'reenviar_codigo' %}" class="entrada__pe">
+        {% csrf_token %}
+        Não recebeu?
+        <button type="submit" class="botao botao--claro botao--pequeno">
+            Enviar outro código
+        </button>
+    </form>
+
+</div>
+
+{% endblock %}
