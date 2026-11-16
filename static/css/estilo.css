@@ -575,6 +575,13 @@ input[type="checkbox"] {
 /* Recado dirigido a escola inteira (RF09). */
 .etiqueta--geral { background-color: var(--azul-900); color: #fff; }
 
+/* Situacao da solicitacao (RF10). Cor como informacao, nao como enfeite:
+   quem olha a lista precisa distinguir de relance o que ainda espera a
+   escola do que ja foi respondido. */
+.etiqueta--aberta     { background-color: var(--ambar-bg); color: var(--ambar); }
+.etiqueta--respondida { background-color: var(--marca-100); color: var(--marca-900); }
+.etiqueta--encerrada  { background-color: #ECEFEF; color: var(--tinta-suave); }
+
 /* Selo de relatorio alterado depois de publicado (RF11). Cor de aviso, nao de
    erro: a edicao e legitima, so precisa ser visivel para quem le. */
 .etiqueta--editado {
