@@ -18,6 +18,10 @@ class Evento(models.Model):
                                   'Respondeu solicitação')
         SOLICITACAO_ENCERRADA = ('SOLICITACAO_ENCERRADA',
                                  'Encerrou solicitação')
+        EMAIL_CONFIRMADO = 'EMAIL_CONFIRMADO', 'Confirmou o e-mail'
+        SENHA_REDEFINICAO_PEDIDA = ('SENHA_REDEFINICAO_PEDIDA',
+                                    'Pediu redefinição de senha')
+        SENHA_REDEFINIDA = 'SENHA_REDEFINIDA', 'Redefiniu a senha'
         EMAIL = 'EMAIL', 'Aviso por e-mail'
         TERMOS_ACEITOS = 'TERMOS_ACEITOS', 'Aceitou os termos de uso'
         

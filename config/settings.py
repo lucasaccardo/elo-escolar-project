@@ -123,9 +123,14 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
+# Toda mensagem que o Django resolver enviar - inclusive a de redefinicao
+# de senha, do RF13 - sai pela API de e-mail que o projeto ja integra, e nao
+# por SMTP. Uma informacao, um lugar: uma credencial so, um tratamento de
+# erro so. A partir do Django 6 a configuracao vive em MAILERS; a antiga
+# EMAIL_BACKEND foi descontinuada e nem e aceita junto com esta.
 MAILERS = {
     'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        'BACKEND': 'acessos.emails.BrevoEmailBackend',
     },
 }
 

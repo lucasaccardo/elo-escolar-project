@@ -116,3 +116,26 @@ class LoginForm(AuthenticationForm):
             return ('Seu pedido de acesso foi recusado. '
                     'Procure a secretaria da escola.')
         return 'Acesso desativado. Procure a secretaria da escola.'
+
+
+class CodigoForm(forms.Form):
+    """Código de seis dígitos da confirmação de e-mail (RF14)."""
+
+    codigo = forms.CharField(
+        label='Código de seis dígitos',
+        max_length=6,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'inputmode': 'numeric',
+            'autocomplete': 'one-time-code',
+            'placeholder': '000000',
+        }),
+    )
+
+    def clean_codigo(self):
+        codigo = self.cleaned_data['codigo'].strip()
+        if not codigo.isdigit() or len(codigo) != 6:
+            raise forms.ValidationError(
+                'O código tem exatamente seis dígitos.'
+            )
+        return codigo

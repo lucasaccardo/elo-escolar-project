@@ -26,9 +26,14 @@ def solicitacoes_que_pode_analisar(user):
     # turmas dele; coordenação e direção veem todos.
     if not pode_aprovar_acessos(user):
         return SolicitacaoAcesso.objects.none()
+    # RF14: a fila mostra apenas pedidos cujo e-mail ja foi confirmado.
+    # Sem isso, a escola gastaria tempo analisando cadastro com endereco
+    # digitado errado - e aprovaria um acesso cujo aviso nunca chegaria.
     return SolicitacaoAcesso.objects.filter(
-        aluno__turma__in=turmas_visiveis(user)
+        aluno__turma__in=turmas_visiveis(user),
+        usuario__confirmacao_email__confirmado_em__isnull=False,
     )
+
 
 def aceitou_termos(user):
     # Negue por padrao: sem registro da versao vigente, nao aceitou.

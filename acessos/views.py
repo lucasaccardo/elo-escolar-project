@@ -12,8 +12,15 @@ from auditoria.models import Evento
 from auditoria.services import registrar
 from relatorios.models import Perfil
 
-from .forms import CadastroResponsavelForm
-from .models import VERSAO_TERMOS, AceiteTermos, SolicitacaoAcesso
+from .forms import CadastroResponsavelForm, CodigoForm
+from .models import (
+    MAXIMO_DE_TENTATIVAS,
+    VALIDADE_DO_CODIGO_MINUTOS,
+    VERSAO_TERMOS,
+    AceiteTermos,
+    ConfirmacaoEmail,
+    SolicitacaoAcesso,
+)
 from .notificacoes import enviar_email
 from .permissions import pode_aprovar_acessos, solicitacoes_que_pode_analisar
 
@@ -45,7 +52,12 @@ def cadastro_responsavel(request):
                     usuario=usuario,
                     versao=VERSAO_TERMOS,
                 )
-            return redirect('cadastro_enviado')
+            # RF14: o e-mail informado ainda nao foi provado. Antes de
+            # o pedido chegar a escola, a pessoa precisa confirmar que o
+            # endereco e dela.
+            _mandar_codigo(request, usuario)
+            request.session['confirmacao_usuario_id'] = usuario.id
+            return redirect('confirmar_email')
     else:
         form = CadastroResponsavelForm()
 
@@ -221,3 +233,101 @@ def recusar_solicitacao(request, pk):
     nome = solicitacao.usuario.get_full_name()
     messages.success(request, f'Pedido de {nome} recusado.')
     return redirect('fila_aprovacao')
+
+
+def _mandar_codigo(request, usuario):
+    """Gera um codigo novo e manda por e-mail. Registra o envio no log."""
+    _, codigo = ConfirmacaoEmail.gerar(usuario)
+    assunto = 'Elo Escolar - confirme seu e-mail'
+    texto = (
+        f'Olá, {usuario.get_full_name() or usuario.username}.\n\n'
+        f'Seu código de confirmação é: {codigo}\n\n'
+        f'Ele vale por {VALIDADE_DO_CODIGO_MINUTOS} minutos e só pode ser '
+        'usado uma vez.\n\n'
+        'Se não foi você quem se cadastrou no Elo Escolar, ignore esta '
+        'mensagem.\n'
+    )
+    deu_certo, detalhe = enviar_email(
+        usuario.email, usuario.get_full_name(), assunto, texto,
+    )
+    registrar(
+        Evento.Acao.EMAIL,
+        usuario_informado=usuario.email,
+        detalhe=f'código de confirmação / {"enviado" if deu_certo else detalhe}',
+    )
+    return deu_certo
+
+
+def _confirmacao_da_sessao(request):
+    """Quem esta confirmando nao esta autenticado: a conta nasce desligada.
+
+    Por isso a identidade vem da sessao, gravada no momento do cadastro, e
+    nao de um id na barra de enderecos - que permitiria tentar codigos de
+    outras pessoas.
+    """
+    usuario_id = request.session.get('confirmacao_usuario_id')
+    if not usuario_id:
+        return None
+    return ConfirmacaoEmail.objects.filter(usuario_id=usuario_id).first()
+
+
+def confirmar_email(request):
+    confirmacao = _confirmacao_da_sessao(request)
+    if confirmacao is None:
+        return redirect('cadastro')
+
+    if confirmacao.confirmado:
+        return redirect('cadastro_enviado')
+
+    if request.method == 'POST':
+        form = CodigoForm(request.POST)
+    else:
+        form = CodigoForm()
+
+    if request.method == 'POST' and form.is_valid():
+        deu_certo, motivo = confirmacao.conferir(form.cleaned_data['codigo'])
+        if deu_certo:
+            registrar(
+                Evento.Acao.EMAIL_CONFIRMADO,
+                usuario_informado=confirmacao.usuario.email,
+            )
+            del request.session['confirmacao_usuario_id']
+            return redirect('cadastro_enviado')
+
+        if motivo == 'expirado':
+            messages.error(
+                request,
+                'Este código expirou. Peça outro para continuar.',
+            )
+        elif motivo == 'tentativas esgotadas':
+            messages.error(
+                request,
+                'Número de tentativas esgotado. Peça um código novo.',
+            )
+        else:
+            restantes = MAXIMO_DE_TENTATIVAS - confirmacao.tentativas
+            messages.error(
+                request,
+                f'Código incorreto. Você ainda tem {restantes} '
+                f'{"tentativa" if restantes == 1 else "tentativas"}.',
+            )
+
+    return render(request, 'acessos/confirmar_email.html', {
+        'form': form,
+        'email': confirmacao.usuario.email,
+        'validade': VALIDADE_DO_CODIGO_MINUTOS,
+    })
+
+
+@require_POST
+def reenviar_codigo(request):
+    confirmacao = _confirmacao_da_sessao(request)
+    if confirmacao is None:
+        return redirect('cadastro')
+
+    if confirmacao.confirmado:
+        return redirect('cadastro_enviado')
+
+    _mandar_codigo(request, confirmacao.usuario)
+    messages.success(request, 'Enviamos um código novo para o seu e-mail.')
+    return redirect('confirmar_email')

@@ -1,0 +1,41 @@
+{% extends 'relatorios/base.html' %}
+{% load static %}
+
+{% block titulo %}Verifique seu e-mail - Elo Escolar{% endblock %}
+
+{% block corpo_classe %}pagina-entrada{% endblock %}
+
+{% block lateral %}{% endblock %}
+
+{% block conteudo %}
+
+<div class="entrada">
+
+    <div class="entrada__marca">
+        <img src="{% static 'img/logo-elo-completo.png' %}" alt="Elo Escolar">
+    </div>
+
+    <h1 class="entrada__titulo">Verifique seu e-mail</h1>
+
+    <div class="cartao">
+        <div class="cartao__corpo">
+            <p>
+                Se houver uma conta com o endereço informado, a ligação para
+                criar uma senha nova chegará em instantes.
+            </p>
+            <p>
+                A ligação vale por tempo limitado e só pode ser usada uma
+                vez. Se não encontrar a mensagem, confira a caixa de spam.
+            </p>
+
+            <div class="acoes" style="margin-top: 1.4rem;">
+                <a href="{% url 'login' %}" class="botao botao--principal">
+                    Voltar para a tela de entrada
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

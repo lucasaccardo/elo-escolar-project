@@ -1,0 +1,80 @@
+{% extends 'relatorios/base.html' %}
+{% load static %}
+
+{% block titulo %}Criar senha nova - Elo Escolar{% endblock %}
+
+{% block corpo_classe %}pagina-entrada{% endblock %}
+
+{% block lateral %}{% endblock %}
+
+{% block conteudo %}
+
+<div class="entrada">
+
+    <div class="entrada__marca">
+        <img src="{% static 'img/logo-elo-completo.png' %}" alt="Elo Escolar">
+    </div>
+
+    {% if validlink %}
+
+        <h1 class="entrada__titulo">Criar senha nova</h1>
+        <p class="entrada__subtitulo">
+            Escolha uma senha que você não use em outros serviços.
+        </p>
+
+        <div class="cartao">
+            <div class="cartao__corpo">
+
+                {% for erro in form.non_field_errors %}
+                    <div class="aviso aviso--erro">{{ erro }}</div>
+                {% endfor %}
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    {% for campo in form %}
+                        <div class="campo">
+                            <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                            {{ campo }}
+                            {% if campo.help_text %}
+                                <div class="ajuda">{{ campo.help_text|safe }}</div>
+                            {% endif %}
+                            {% for erro in campo.errors %}
+                                <div class="erro-campo">{{ erro }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+                    <div style="margin-top: 1.4rem;">
+                        <button type="submit" class="botao botao--principal botao--largo">
+                            Salvar senha nova
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+    {% else %}
+
+        <h1 class="entrada__titulo">Ligação inválida</h1>
+
+        <div class="cartao">
+            <div class="cartao__corpo">
+                <p>
+                    Esta ligação não vale mais. Isso acontece quando ela já
+                    foi usada uma vez ou quando o prazo expirou.
+                </p>
+                <div class="acoes" style="margin-top: 1.4rem;">
+                    <a href="{% url 'password_reset' %}" class="botao botao--principal">
+                        Pedir uma ligação nova
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
