@@ -126,16 +126,35 @@ class CadastroResponsavelFormTest(SimpleTestCase):
         formulario.cleaned_data = dados
         return formulario
 
+    @patch('acessos.forms.confirmacao_pendente', return_value=False)
     @patch('acessos.forms.User')
-    def test_email_ja_cadastrado_bloqueia_o_cadastro(self, user_falso):
+    def test_email_ja_cadastrado_bloqueia_o_cadastro(self, user_falso, _pend):
         # Violacao de regra, com conferencia do TIPO e da MENSAGEM do erro.
-        user_falso.objects.filter.return_value.exists.return_value = True
+        # O dublé de confirmacao_pendente responde que o cadastro NAO parou
+        # no meio: logo, e cadastro repetido mesmo.
+        user_falso.objects.filter.return_value.first.return_value = object()
         formulario = self._formulario_com(email='pai@exemplo.com')
 
         with self.assertRaises(ValidationError) as erro:
             formulario.clean_email()
 
         self.assertIn('Este e-mail já está cadastrado.', erro.exception.messages)
+
+    @patch('acessos.forms.confirmacao_pendente', return_value=True)
+    @patch('acessos.forms.User')
+    def test_cadastro_inacabado_nao_e_tratado_como_repetido(
+            self, user_falso, _pend):
+        # A diferenca entre os dois casos num unico ponto: muda so a
+        # resposta de confirmacao_pendente. Aqui o e-mail passa, e o
+        # formulario guarda de quem e a conta para a view retomar.
+        inacabada = object()
+        user_falso.objects.filter.return_value.first.return_value = inacabada
+        formulario = self._formulario_com(email='pai@exemplo.com')
+
+        resultado = formulario.clean_email()
+
+        self.assertEqual(resultado, 'pai@exemplo.com')
+        self.assertIs(formulario.usuario_pendente, inacabada)
 
     @patch('acessos.forms.Aluno')
     def test_rgm_inexistente_bloqueia_o_cadastro(self, aluno_falso):
@@ -158,7 +177,7 @@ class CadastroResponsavelFormTest(SimpleTestCase):
     def test_email_novo_e_guardado_em_minusculas(self, user_falso):
         # Caminho feliz: o e-mail vira o nome de usuario, entao e padronizado
         # em minusculas para que Pai@ e pai@ nao virem duas contas.
-        user_falso.objects.filter.return_value.exists.return_value = False
+        user_falso.objects.filter.return_value.first.return_value = None
         formulario = self._formulario_com(email='Pai@Exemplo.COM')
 
         resultado = formulario.clean_email()

@@ -170,3 +170,31 @@ class ConfirmacaoEmail(models.Model):
         self.confirmado_em = timezone.now()
         self.save(update_fields=['tentativas', 'confirmado_em'])
         return True, 'confirmado'
+
+
+def confirmacao_pendente(usuario):
+    """Diz se este cadastro parou no meio, antes de confirmar o e-mail.
+
+    Serve para desfazer um beco sem saída: quem fecha o navegador antes de
+    digitar o código perde a sessão, não consegue entrar (a conta nasce
+    desligada) e não consegue recuperar a senha (o Django só envia a
+    ligação para conta ativa). Sem isto, a única saída seria ligar para a
+    escola.
+
+    Repare que a conta precisa estar DESLIGADA e com pedido ainda
+    PENDENTE. Conta aprovada, recusada ou já confirmada não entra aqui:
+    nesses casos o cadastro realmente já existe e deve ser recusado.
+    """
+    if usuario.is_active:
+        return False
+
+    confirmacao = ConfirmacaoEmail.objects.filter(usuario=usuario).first()
+    # Cadastro feito antes do RF14 nem tem registro de confirmação; ele
+    # também conta como pendente.
+    if confirmacao is not None and confirmacao.confirmado:
+        return False
+
+    return SolicitacaoAcesso.objects.filter(
+        usuario=usuario,
+        status=SolicitacaoAcesso.Status.PENDENTE,
+    ).exists()

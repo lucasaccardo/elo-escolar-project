@@ -17,6 +17,7 @@ from django.utils import timezone
 
 from acessos.models import (
     MAXIMO_DE_TENTATIVAS,
+    SolicitacaoAcesso,
     VALIDADE_DO_CODIGO_MINUTOS,
     ConfirmacaoEmail,
 )
@@ -304,3 +305,117 @@ class TelaDeConfirmacaoTest(TestCase):
             ).count(),
             1,
         )
+
+
+@tag('integracao')
+class RetomarCadastroInacabadoTest(TelaDeConfirmacaoTest):
+    """O cadastro que parou antes da confirmação não vira um beco sem saída.
+
+    Quem fecha o navegador antes de digitar o código perde a sessão. Sem o
+    que é testado aqui, essa pessoa ficaria presa: não entra, porque a conta
+    nasce desligada; não recupera a senha, porque o Django só envia a ligação
+    para conta ativa; e não cadastra de novo, porque o e-mail já existe.
+    """
+
+    def test_cadastrar_de_novo_retoma_a_confirmacao(self):
+        # Caminho feliz da correção: ela refaz o cadastro e cai de volta na
+        # tela de confirmação, com um código novo.
+        pessoa, _ = self.cadastrar()
+        self.client.logout()
+        sessao = self.client.session
+        sessao.flush()
+
+        with patch('acessos.views.enviar_email',
+                   return_value=(True, 'HTTP 201')) as email_falso:
+            resposta = self.client.post(
+                reverse('cadastro'), self.dados_do_cadastro(),
+            )
+
+        self.assertEqual(resposta.status_code, 302)
+        self.assertEqual(resposta['Location'], reverse('confirmar_email'))
+        email_falso.assert_called_once()
+        # E nada foi duplicado: nem conta, nem pedido de acesso.
+        self.assertEqual(
+            User.objects.filter(username='ana.souza@example.com').count(), 1,
+        )
+        self.assertEqual(
+            SolicitacaoAcesso.objects.filter(usuario=pessoa).count(), 1,
+        )
+
+    def test_retomar_nao_troca_a_senha_da_conta(self):
+        # Segurança, e a razão de a tela não alterar nada: se o segundo
+        # cadastro trocasse a senha, outra pessoa poderia digitar um e-mail
+        # alheio com uma senha sua. O dono confirmaria pelo código que chega
+        # na caixa DELE, a escola aprovaria, e a conta nasceria aprovada com
+        # a senha do estranho.
+        pessoa, _ = self.cadastrar()
+        sessao = self.client.session
+        sessao.flush()
+
+        self.client.post(
+            reverse('cadastro'),
+            self.dados_do_cadastro(senha='OutraSenha2026!',
+                                   confirmar_senha='OutraSenha2026!'),
+        )
+
+        pessoa.refresh_from_db()
+        self.assertTrue(pessoa.check_password('SenhaForte2026'))
+        self.assertFalse(pessoa.check_password('OutraSenha2026!'))
+
+    def test_o_codigo_novo_e_o_que_vale(self):
+        pessoa, primeiro = self.cadastrar()
+        sessao = self.client.session
+        sessao.flush()
+
+        with patch('acessos.views.enviar_email',
+                   return_value=(True, 'HTTP 201')) as email_falso:
+            self.client.post(reverse('cadastro'), self.dados_do_cadastro())
+        segundo = email_falso.call_args.args[3].split('confirmação é: ')[1][:6]
+
+        self.client.post(reverse('confirmar_email'), {'codigo': primeiro})
+        self.assertFalse(pessoa.confirmacao_email.confirmado)
+
+        self.client.post(reverse('confirmar_email'), {'codigo': segundo})
+        pessoa.confirmacao_email.refresh_from_db()
+        self.assertTrue(pessoa.confirmacao_email.confirmado)
+
+    def test_cadastro_ja_confirmado_continua_sendo_recusado(self):
+        # Fronteira da regra. Aqui o cadastro nao parou no meio: ele esta
+        # completo, so esperando a escola. Entao e cadastro repetido mesmo.
+        pessoa, codigo = self.cadastrar()
+        self.client.post(reverse('confirmar_email'), {'codigo': codigo})
+
+        resposta = self.client.post(
+            reverse('cadastro'), self.dados_do_cadastro(),
+        )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, 'já está cadastrado')
+
+    def test_conta_ja_aprovada_continua_sendo_recusada(self):
+        # Outra fronteira: conta ligada nao se recadastra de jeito nenhum.
+        pessoa, _ = self.cadastrar()
+        pessoa.is_active = True
+        pessoa.save(update_fields=['is_active'])
+
+        resposta = self.client.post(
+            reverse('cadastro'), self.dados_do_cadastro(),
+        )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, 'já está cadastrado')
+
+    def test_pedido_recusado_nao_permite_recomecar_pela_tela(self):
+        # Fronteira final: se a escola recusou, a pessoa procura a
+        # secretaria. Deixar recomeçar aqui transformaria a recusa em nada.
+        pessoa, _ = self.cadastrar()
+        SolicitacaoAcesso.objects.filter(usuario=pessoa).update(
+            status=SolicitacaoAcesso.Status.RECUSADA,
+        )
+
+        resposta = self.client.post(
+            reverse('cadastro'), self.dados_do_cadastro(),
+        )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, 'já está cadastrado')

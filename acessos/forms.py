@@ -5,7 +5,7 @@ from django.contrib.auth.password_validation import validate_password
 
 from relatorios.models import Aluno
 
-from .models import SolicitacaoAcesso
+from .models import SolicitacaoAcesso, confirmacao_pendente
 
 User = get_user_model()
 
@@ -45,12 +45,26 @@ class CadastroResponsavelForm(forms.Form):
             else:
                 campo.widget.attrs['class'] = 'form-control'
 
+    # Preenchido quando o e-mail pertence a um cadastro que parou antes da
+    # confirmação. A view lê este atributo e retoma de onde parou.
+    usuario_pendente = None
+
     def clean_email(self):
         # O e-mail vira o nome de usuário, então não pode repetir.
         email = self.cleaned_data['email'].lower()
-        if User.objects.filter(username=email).exists():
-            raise forms.ValidationError('Este e-mail já está cadastrado.')
-        return email
+        usuario = User.objects.filter(username=email).first()
+        if usuario is None:
+            return email
+
+        if confirmacao_pendente(usuario):
+            # Não é um cadastro repetido: é o mesmo cadastro, inacabado.
+            # Nada da conta é alterado aqui - nem a senha. Alterar seria
+            # abrir uma porta para outra pessoa trocar a senha de uma conta
+            # que ainda não é de ninguém, e depois herdá-la aprovada.
+            self.usuario_pendente = usuario
+            return email
+
+        raise forms.ValidationError('Este e-mail já está cadastrado.')
 
     def clean_rgm(self):
         # Só confere se o RGM existe. Nunca mostra o nome da criança.
