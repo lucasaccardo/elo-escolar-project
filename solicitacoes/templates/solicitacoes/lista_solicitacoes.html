@@ -1,0 +1,95 @@
+{% extends 'relatorios/base.html' %}
+
+{% block titulo %}Solicitações - Elo Escolar{% endblock %}
+
+{% block conteudo %}
+
+<div class="cabecalho-pagina">
+    <div>
+        <h1>Solicitações</h1>
+        {% if eh_equipe %}
+            <p>Pedidos das famílias das suas turmas, e o que já foi respondido.</p>
+        {% else %}
+            <p>Seus pedidos à escola, e as respostas que você recebeu.</p>
+        {% endif %}
+    </div>
+
+    {% if pode_abrir %}
+        <a href="{% url 'abrir_solicitacao' %}" class="botao botao--principal">Abrir solicitação</a>
+    {% endif %}
+</div>
+
+{% for solicitacao in solicitacoes %}
+    <div class="cartao">
+
+        <div class="cartao__topo">
+            <h2>{{ solicitacao.assunto }}</h2>
+            <span class="etiqueta etiqueta--{{ solicitacao.situacao }}">
+                {{ solicitacao.get_situacao_display }}
+            </span>
+        </div>
+
+        <div class="cartao__corpo">
+            <div class="dado__rotulo">
+                {{ solicitacao.get_tipo_display }} ·
+                {{ solicitacao.aluno.nome_completo }} ·
+                {{ solicitacao.aluno.turma.nome }}
+            </div>
+            <p>{{ solicitacao.descricao|linebreaksbr }}</p>
+
+            {% if solicitacao.foi_respondida %}
+                <div class="bloco">
+                    <strong>Resposta da escola:</strong>
+                    {{ solicitacao.resposta|linebreaksbr }}
+                    <br><span class="texto-pequeno">
+                        Por {{ solicitacao.respondida_por.get_full_name|default:solicitacao.respondida_por }}
+                        em {{ solicitacao.respondida_em|date:"d/m/Y \à\s H:i" }}
+                    </span>
+                </div>
+            {% else %}
+                <div class="bloco bloco--tarefa">
+                    <strong>Aguardando resposta da escola.</strong>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if solicitacao.pode_responder or solicitacao.pode_encerrar %}
+            <div class="cartao__acoes">
+                {% if solicitacao.pode_responder %}
+                    <a href="{% url 'responder_solicitacao' solicitacao.id %}"
+                       class="botao botao--principal botao--pequeno">
+                        {% if solicitacao.foi_respondida %}Responder de novo{% else %}Responder{% endif %}
+                    </a>
+                {% endif %}
+
+                {% if solicitacao.pode_encerrar %}
+                    <form method="post" action="{% url 'encerrar_solicitacao' solicitacao.id %}"
+                          onsubmit="return confirm('Encerrar esta solicitação? Use quando o assunto estiver resolvido.');">
+                        {% csrf_token %}
+                        <button type="submit" class="botao botao--claro botao--pequeno">Encerrar</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <div class="cartao__rodape">
+            Aberta por {{ solicitacao.autor.get_full_name|default:solicitacao.autor }}
+            em {{ solicitacao.aberta_em|date:"d/m/Y \à\s H:i" }}
+        </div>
+
+    </div>
+
+{% empty %}
+    <div class="vazio">
+        {% if eh_equipe %}
+            <strong>Nenhuma solicitação das suas turmas</strong>
+            Quando uma família abrir um pedido, ele aparece aqui.
+        {% else %}
+            <strong>Você ainda não abriu nenhuma solicitação</strong>
+            Use o botão acima para falar com a escola sobre uma falta, um
+            pedido de contato ou uma dúvida.
+        {% endif %}
+    </div>
+{% endfor %}
+
+{% endblock %}

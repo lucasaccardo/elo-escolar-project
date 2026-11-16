@@ -21,6 +21,8 @@ from acessos.permissions import (
 )
 from recados.permissions import recados_visiveis
 from relatorios.models import RelatorioDiario
+from solicitacoes.models import Solicitacao
+from solicitacoes.permissions import solicitacoes_visiveis
 from relatorios.permissions import (
     eh_responsavel,
     obter_perfil,
@@ -99,6 +101,11 @@ def _indicadores_da_escola(user):
             'valor': pendentes,
             'nota': 'Famílias esperando aprovação',
         },
+        {
+            'rotulo': 'Solicitações a responder',
+            'valor': _solicitacoes_abertas(user),
+            'nota': 'Pedidos das famílias ainda sem resposta',
+        },
     ]
 
 
@@ -135,7 +142,25 @@ def _indicadores_da_familia(user):
             'valor': user.perfil.alunos.count(),
             'nota': 'Vínculos aprovados pela escola',
         },
+        {
+            'rotulo': 'Solicitações sem resposta',
+            'valor': _solicitacoes_abertas(user),
+            'nota': 'Pedidos seus que a escola ainda não respondeu',
+        },
     ]
+
+
+def _solicitacoes_abertas(user):
+    """Solicitacoes que ainda esperam a escola.
+
+    Reaproveita solicitacoes_visiveis, de modo que o numero conte o mesmo
+    conjunto que a tela de solicitacoes apresenta aquele perfil: para a
+    equipe, os pedidos das turmas que ela acompanha; para a familia, os
+    pedidos que ela propria abriu.
+    """
+    return solicitacoes_visiveis(user).filter(
+        situacao=Solicitacao.Situacao.ABERTA,
+    ).count()
 
 
 def _recados_no_ar(user):

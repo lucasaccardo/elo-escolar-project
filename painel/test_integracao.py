@@ -18,6 +18,7 @@ from painel.services import (
     relatorios_por_turma,
 )
 from recados.models import Recado
+from solicitacoes.models import Solicitacao
 from relatorios.models import Aluno, Perfil, RelatorioDiario, Turma
 
 User = get_user_model()
@@ -178,6 +179,46 @@ class IndicadoresDaEscolaTest(BaseDoPainel):
 
         self.assertEqual(self.valor_de(numeros, 'Pedidos de acesso'), 0)
 
+    def test_conta_apenas_as_solicitacoes_ainda_sem_resposta(self):
+        # O indicador conta o que espera a escola, nao o historico.
+        Solicitacao.objects.create(
+            aluno=self.aluno, autor=self.responsavel,
+            tipo=Solicitacao.Tipo.DUVIDA, assunto='Sem resposta',
+            descricao='x',
+        )
+        respondida = Solicitacao.objects.create(
+            aluno=self.aluno, autor=self.responsavel,
+            tipo=Solicitacao.Tipo.DUVIDA, assunto='Ja respondida',
+            descricao='x',
+        )
+        respondida.responder(self.professora, 'Respondido com calma.')
+
+        numeros = indicadores(self.professora)
+
+        self.assertEqual(
+            self.valor_de(numeros, 'Solicitações a responder'), 1,
+        )
+
+    def test_professora_nao_conta_solicitacao_de_turma_alheia(self):
+        # Seguranca: o painel reaproveita a mesma regra de visibilidade.
+        fora = Aluno.objects.create(
+            nome_completo='Clara Lima', rgm='2026002', turma=self.outra_turma,
+        )
+        Solicitacao.objects.create(
+            aluno=fora, autor=self.responsavel,
+            tipo=Solicitacao.Tipo.DUVIDA, assunto='De outra turma',
+            descricao='x',
+        )
+
+        self.assertEqual(
+            self.valor_de(indicadores(self.professora),
+                          'Solicitações a responder'), 0,
+        )
+        self.assertEqual(
+            self.valor_de(indicadores(self.coordenador),
+                          'Solicitações a responder'), 1,
+        )
+
 
 class IndicadoresDaFamiliaTest(BaseDoPainel):
 
@@ -188,7 +229,9 @@ class IndicadoresDaFamiliaTest(BaseDoPainel):
 
         self.assertIn('Tarefas desta semana', rotulos)
         self.assertIn('Estudantes acompanhados', rotulos)
+        self.assertIn('Solicitações sem resposta', rotulos)
         self.assertNotIn('Pedidos de acesso pendentes', rotulos)
+        self.assertNotIn('Solicitações a responder', rotulos)
 
     def test_conta_as_tarefas_com_entrega_nos_proximos_sete_dias(self):
         self.relatorio(dias_atras=1, tarefa_em=2)    # entra

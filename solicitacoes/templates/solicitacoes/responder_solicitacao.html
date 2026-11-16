@@ -1,0 +1,56 @@
+{% extends 'relatorios/base.html' %}
+
+{% block titulo %}Responder solicitação - Elo Escolar{% endblock %}
+
+{% block classe_conteudo %}conteudo--estreito{% endblock %}
+
+{% block conteudo %}
+
+<div class="cabecalho-pagina">
+    <div>
+        <h1>Responder solicitação</h1>
+        <p>A família recebe a resposta no sistema e por e-mail.</p>
+    </div>
+</div>
+
+<div class="cartao">
+    <div class="cartao__topo">
+        <h2>{{ solicitacao.assunto }}</h2>
+        <span class="etiqueta">{{ solicitacao.aluno.turma.nome }}</span>
+    </div>
+
+    <div class="cartao__corpo">
+        <div class="dado__rotulo">
+            {{ solicitacao.get_tipo_display }} ·
+            {{ solicitacao.aluno.nome_completo }} ·
+            aberta por {{ solicitacao.autor.get_full_name|default:solicitacao.autor }}
+            em {{ solicitacao.aberta_em|date:"d/m/Y \à\s H:i" }}
+        </div>
+        <p>{{ solicitacao.descricao|linebreaksbr }}</p>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% for campo in form %}
+                <div class="campo">
+                    <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                    {{ campo }}
+                    {% if campo.help_text %}
+                        <div class="ajuda">{{ campo.help_text }}</div>
+                    {% endif %}
+                    {% for erro in campo.errors %}
+                        <div class="erro-campo">{{ erro }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <div class="acoes" style="margin-top: 1.5rem;">
+                <button type="submit" class="botao botao--principal">Enviar resposta</button>
+                <a href="{% url 'lista_solicitacoes' %}" class="botao botao--claro">Cancelar</a>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
