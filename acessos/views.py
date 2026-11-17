@@ -30,6 +30,20 @@ User = get_user_model()
 def cadastro_responsavel(request):
     if request.method == 'POST':
         form = CadastroResponsavelForm(request.POST)
+        if form.is_valid() and form.usuario_pendente is not None:
+            # Cadastro que parou antes de confirmar o e-mail: retoma em vez
+            # de recusar. A senha e os dados gravados no primeiro cadastro
+            # continuam valendo - esta tela não altera nada da conta.
+            usuario = form.usuario_pendente
+            _mandar_codigo(request, usuario)
+            request.session['confirmacao_usuario_id'] = usuario.id
+            messages.info(
+                request,
+                'Este cadastro já tinha sido iniciado e ainda não foi '
+                'confirmado. Enviamos um código novo para o seu e-mail.',
+            )
+            return redirect('confirmar_email')
+
         if form.is_valid():
             dados = form.cleaned_data
             # Ou grava as duas coisas, ou não grava nenhuma.

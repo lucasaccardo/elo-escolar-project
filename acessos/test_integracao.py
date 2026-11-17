@@ -146,7 +146,13 @@ class CadastroResponsavelTest(BaseDeAcesso):
     @patch('acessos.views.enviar_email', return_value=(True, 'HTTP 201'))
     def test_email_repetido_nao_cria_segunda_conta(self, _email):
         # Cenario de erro: o e-mail vira nome de usuario, entao nao repete.
+        # O cadastro anterior precisa estar concluido - e-mail confirmado -
+        # senao o sistema entende que e o mesmo cadastro inacabado e retoma
+        # a confirmacao, que e o caso testado em test_confirmacao.py.
         self.client.post(reverse('cadastro'), self.dados_do_cadastro())
+        self.confirmar_o_email(
+            User.objects.get(username='ana.souza@example.com')
+        )
 
         resposta = self.client.post(reverse('cadastro'), self.dados_do_cadastro())
 
