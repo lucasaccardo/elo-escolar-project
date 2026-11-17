@@ -12,7 +12,7 @@ from datetime import date
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, tag
 from django.urls import reverse
 from django.utils import timezone
 
@@ -27,6 +27,9 @@ from relatorios.models import Aluno, Perfil, RelatorioDiario, Turma
 User = get_user_model()
 
 
+# A etiqueta vale também para as classes que herdam desta, o que permite
+# separar as duas camadas na linha de comando com --tag e --exclude-tag.
+@tag('integracao')
 class BaseDeAcesso(TestCase):
 
     def setUp(self):

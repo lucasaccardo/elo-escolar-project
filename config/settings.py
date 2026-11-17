@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
-from decouple import config
+
+import dj_database_url
+from decouple import Csv, config
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,7 +21,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = []
+# Em producao esta lista precisa conter o endereco do servidor; vazia, o
+# Django recusa toda requisicao. Vem do ambiente para que o mesmo codigo
+# sirva na maquina de desenvolvimento e no servidor.
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost',
+                       cast=Csv())
+
+# O Django exige o endereco com esquema para aceitar formulario vindo de
+# fora de localhost. Sem isto, todo POST em producao falha com 403.
+CSRF_TRUSTED_ORIGINS = [
+    f'https://{host}' for host in ALLOWED_HOSTS if not host.startswith('127.')
+    and host != 'localhost'
+]
 
 
 # Application definition
@@ -41,6 +54,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Logo depois da seguranca e antes de tudo mais: e ele que serve os
+    # arquivos estaticos em producao, sem precisar de servidor separado.
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -74,11 +90,17 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
+# Um unico lugar decide qual banco e usado: a variavel DATABASE_URL. Sem
+# ela, o SQLite do ambiente de desenvolvimento; com ela, o PostgreSQL do
+# servidor. Nenhuma credencial fica no codigo.
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        # Reaproveita a conexao por dez minutos em vez de abrir uma nova a
+        # cada requisicao, que e caro em banco gerenciado.
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
 
 
@@ -120,6 +142,33 @@ STATIC_URL = 'static/'
 
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
+# Para onde o collectstatic junta tudo antes de o servidor publicar.
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Em producao, o nome de cada arquivo estatico recebe um resumo do seu
+# conteudo (estilo.a1b2c3.css). Assim o navegador pode guarda-lo para
+# sempre e, quando o conteudo muda, o nome muda junto - o que resolve de
+# vez o problema de a folha de estilo antiga continuar aparecendo depois de
+# uma correcao.
+#
+# Em desenvolvimento esse armazenamento NAO e usado, e de proposito: ele
+# depende de um manifesto gerado pelo collectstatic, e exigir o manifesto
+# numa maquina onde ele nao existe derrubaria o servidor local e a suite de
+# testes inteira.
+ARMAZENAMENTO_ESTATICO = (
+    'django.contrib.staticfiles.storage.StaticFilesStorage' if DEBUG
+    else 'config.storage.ArquivosEstaticos'
+)
+
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': ARMAZENAMENTO_ESTATICO,
+    },
+}
+
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
@@ -137,3 +186,18 @@ MAILERS = {
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'painel'
 LOGOUT_REDIRECT_URL = 'login'
+
+
+# Seguranca em producao. Sao desligadas em desenvolvimento porque o
+# servidor local nao fala HTTPS, e exigir HTTPS ali impediria de abrir o
+# sistema na propria maquina.
+if not DEBUG:
+    # O Render encerra o HTTPS antes da aplicacao e avisa pelo cabecalho.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # Diz ao navegador para so voltar neste endereco por HTTPS, por um ano.
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
