@@ -8,7 +8,7 @@ numero errado aqui seria vazamento de dado, nao so erro de conta.
 from datetime import date, timedelta
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, tag
 from django.urls import reverse
 
 from acessos.models import VERSAO_TERMOS, AceiteTermos
@@ -24,6 +24,9 @@ from relatorios.models import Aluno, Perfil, RelatorioDiario, Turma
 User = get_user_model()
 
 
+# A etiqueta vale também para as classes que herdam desta, o que permite
+# separar as duas camadas na linha de comando com --tag e --exclude-tag.
+@tag('integracao')
 class BaseDoPainel(TestCase):
 
     def setUp(self):
@@ -111,12 +114,16 @@ class TelaDoPainelTest(BaseDoPainel):
     def test_a_pagina_serve_o_chartjs_do_proprio_sistema(self):
         # Decisao de projeto conferida por teste: nada de CDN. Se um dia
         # alguem trocar por um link externo, este teste reprova.
+        #
+        # A conferencia e pelo caminho, e nao pelo nome exato do arquivo,
+        # porque em producao o nome carrega um resumo do conteudo
+        # (chart.umd.283d65ad75ec.js) para o navegador poder guarda-lo.
         self.relatorio(dias_atras=1)
         self.entrar_como(self.professora)
 
         resposta = self.client.get(reverse('painel'))
 
-        self.assertContains(resposta, 'js/chart.umd.js')
+        self.assertContains(resposta, '/static/js/chart.umd')
         self.assertNotContains(resposta, 'cdn.')
         self.assertContains(resposta, 'grafico-semanas')
 

@@ -1,0 +1,44 @@
+# Descricao da infraestrutura do Elo Escolar, lida pelo Render.
+#
+# Ter isto versionado no repositorio significa que a configuracao do
+# servidor e revisavel como qualquer outro codigo, e que recriar o ambiente
+# nao depende de alguem lembrar quais botoes clicou.
+services:
+  - type: web
+    name: elo-escolar
+    runtime: python
+    plan: free
+    region: oregon
+    # "bash build.sh" e nao "./build.sh": o Windows nao guarda a
+    # permissao de execucao, entao o arquivo chega ao servidor sem
+    # ela e "./build.sh" falharia com "permission denied".
+    buildCommand: "bash build.sh"
+    startCommand: "gunicorn config.wsgi:application"
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.0"
+      - key: SECRET_KEY
+        generateValue: true     # o Render sorteia; ninguem precisa ver
+      - key: DEBUG
+        value: "False"
+      - key: WEB_CONCURRENCY
+        value: "2"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: elo-escolar-db
+          property: connectionString
+      # Preenchidas a mao no painel, por serem segredo de servico externo:
+      #   ALLOWED_HOSTS, BREVO_API_KEY, EMAIL_REMETENTE
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: EMAIL_REMETENTE
+        sync: false
+
+databases:
+  - name: elo-escolar-db
+    plan: free
+    databaseName: elo_escolar
+    region: oregon

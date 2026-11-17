@@ -16,7 +16,7 @@ import urllib.request
 from datetime import date
 
 from django.contrib.auth import get_user_model
-from django.test import LiveServerTestCase, TestCase
+from django.test import LiveServerTestCase, TestCase, tag
 from django.urls import reverse
 
 from acessos.models import VERSAO_TERMOS, AceiteTermos
@@ -26,6 +26,9 @@ from relatorios.models import Aluno, Perfil, RelatorioDiario, Turma
 User = get_user_model()
 
 
+# A etiqueta vale também para as classes que herdam desta, o que permite
+# separar as duas camadas na linha de comando com --tag e --exclude-tag.
+@tag('integracao')
 class BaseDeIntegracao(TestCase):
     """Monta o cenario comum: uma escola pequena, com gente de cada perfil."""
 
@@ -410,6 +413,7 @@ class SemRedirecionar(urllib.request.HTTPErrorProcessor):
     https_response = http_response
 
 
+@tag('integracao')
 class HttpRealTest(LiveServerTestCase):
     """Testes por HTTP de verdade, em porta aleatoria.
 
