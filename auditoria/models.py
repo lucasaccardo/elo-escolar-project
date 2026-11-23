@@ -7,6 +7,7 @@ class Evento(models.Model):
     class Acao(models.TextChoices):
         LOGIN = 'LOGIN', 'Entrou no sistema'
         LOGIN_FALHA = 'LOGIN_FALHA', 'Erro ao entrar'
+        LOGIN_BLOQUEADO = 'LOGIN_BLOQUEADO', 'Entrada bloqueada por tentativas'
         ACESSO_APROVADO = 'ACESSO_APROVADO', 'Aprovou pedido de acesso'
         ACESSO_RECUSADO = 'ACESSO_RECUSADO', 'Recusou pedido de acesso'
         RELATORIO_PUBLICADO = 'RELATORIO_PUBLICADO', 'Publicou relatório'

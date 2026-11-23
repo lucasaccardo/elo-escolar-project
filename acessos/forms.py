@@ -5,7 +5,15 @@ from django.contrib.auth.password_validation import validate_password
 
 from relatorios.models import Aluno
 
-from .models import SolicitacaoAcesso, confirmacao_pendente
+from auditoria.models import Evento
+from auditoria.services import registrar
+
+from .models import (
+    JANELA_DE_BLOQUEIO_MINUTOS,
+    SolicitacaoAcesso,
+    TentativaDeLogin,
+    confirmacao_pendente,
+)
 
 User = get_user_model()
 
@@ -91,25 +99,72 @@ class CadastroResponsavelForm(forms.Form):
         return dados
 
 
+def origem_da_requisicao(request):
+    """Descobre de onde veio a requisição.
+
+    Atrás do servidor de publicação, o endereço que chega em REMOTE_ADDR é
+    o do próprio servidor, e o do visitante vem em X-Forwarded-For. Por
+    isso o cabeçalho é lido primeiro.
+
+    Ele PODE ser forjado por quem monta a requisição à mão, e é justamente
+    por isso que o limite por origem é defesa secundária. O limite que
+    protege a senha é o por conta, que não depende de cabeçalho algum: o
+    identificador digitado é o que o atacante precisa acertar, e falsificá-lo
+    equivale a desistir de atacar aquela conta.
+    """
+    if request is None:
+        return None
+    encaminhado = request.META.get('HTTP_X_FORWARDED_FOR', '')
+    if encaminhado:
+        return encaminhado.split(',')[0].strip()[:45] or None
+    return request.META.get('REMOTE_ADDR') or None
+
+
 class LoginForm(AuthenticationForm):
     error_messages = {
         **AuthenticationForm.error_messages,
         'invalid_login': 'Usuário ou senha inválidos.',
+        'bloqueado': (
+            'Muitas tentativas seguidas. Aguarde '
+            f'{JANELA_DE_BLOQUEIO_MINUTOS} minutos e tente de novo, ou use '
+            '"Esqueci minha senha".'
+        ),
     }
 
     def clean(self):
         # Responsável entra pelo e-mail, que foi gravado em minúsculas.
         usuario = self.cleaned_data.get('username', '')
         if '@' in usuario:
-            self.cleaned_data['username'] = usuario.strip().lower()
+            usuario = usuario.strip().lower()
+            self.cleaned_data['username'] = usuario
+
+        origem = origem_da_requisicao(self.request)
+
+        # A conferência do bloqueio vem ANTES de qualquer tentativa de
+        # autenticar: é o que impede a adivinhação por tentativa e erro, e
+        # também o que mantém o tempo de resposta igual nos dois casos.
+        if TentativaDeLogin.bloqueado(usuario, origem):
+            registrar(
+                Evento.Acao.LOGIN_BLOQUEADO,
+                usuario_informado=usuario,
+                detalhe=f'origem {origem or "desconhecida"}',
+            )
+            raise forms.ValidationError(
+                self.error_messages['bloqueado'], code='bloqueado',
+            )
 
         try:
-            return super().clean()
+            dados = super().clean()
         except forms.ValidationError:
+            TentativaDeLogin.registrar_falha(usuario, origem)
             mensagem = self._mensagem_conta_desligada()
             if mensagem:
                 raise forms.ValidationError(mensagem, code='inactive')
             raise
+
+        # Entrou: o contador daquela conta deixa de fazer sentido.
+        TentativaDeLogin.esquecer(usuario, origem)
+        return dados
 
     def _mensagem_conta_desligada(self):
         # Só explica o motivo para quem acertou a senha. Para os outros,

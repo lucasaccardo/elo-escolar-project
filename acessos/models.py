@@ -198,3 +198,92 @@ def confirmacao_pendente(usuario):
         usuario=usuario,
         status=SolicitacaoAcesso.Status.PENDENTE,
     ).exists()
+
+
+# Quantas tentativas erradas são aceitas antes do bloqueio, e por quanto
+# tempo ele dura. O limite por conta é o que de fato protege a senha; o
+# limite por origem é defesa secundária, contra quem varre várias contas a
+# partir do mesmo lugar.
+JANELA_DE_BLOQUEIO_MINUTOS = 15
+TENTATIVAS_POR_CONTA = 5
+TENTATIVAS_POR_ORIGEM = 20
+
+
+class TentativaDeLogin(models.Model):
+    """Registro das tentativas de entrada malsucedidas.
+
+    Existe para impedir adivinhação de senha por tentativa e erro. Sem
+    limite, um programa simples percorre listas de senhas comuns até
+    acertar, e nenhuma política de senha forte resolve isso sozinha.
+
+    Fica no banco, e não em memória, por uma razão concreta: o servidor
+    roda mais de um processo, e contador em memória seria contado em
+    separado por cada um - o que multiplicaria o limite pelo número de
+    processos sem ninguém perceber.
+
+    O que se guarda é o identificador DIGITADO, não o usuário: a tentativa
+    pode ser contra uma conta que nem existe, e esse caso também interessa.
+    Senha nunca é gravada aqui, em nenhuma circunstância.
+    """
+
+    identificador = models.CharField(max_length=150)
+    origem = models.GenericIPAddressField(null=True, blank=True)
+    em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'tentativa de login'
+        verbose_name_plural = 'tentativas de login'
+        indexes = [
+            models.Index(fields=['identificador', 'em']),
+            models.Index(fields=['origem', 'em']),
+        ]
+
+    def __str__(self):
+        return f'{self.identificador} em {self.em:%d/%m/%Y %H:%M}'
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _inicio_da_janela():
+        return timezone.now() - timedelta(minutes=JANELA_DE_BLOQUEIO_MINUTOS)
+
+    @classmethod
+    def registrar_falha(cls, identificador, origem):
+        return cls.objects.create(
+            identificador=identificador[:150], origem=origem,
+        )
+
+    @classmethod
+    def esquecer(cls, identificador, origem):
+        """Entrada bem-sucedida zera o contador daquela conta.
+
+        Sem isto, quem erra quatro vezes, acerta, e erra mais uma no dia
+        seguinte seria bloqueado por tentativas que já não dizem nada.
+        """
+        cls.objects.filter(identificador=identificador[:150]).delete()
+        if origem:
+            cls.objects.filter(origem=origem).delete()
+
+    @classmethod
+    def bloqueado(cls, identificador, origem):
+        """Diz se esta tentativa deve ser recusada antes de conferir a senha.
+
+        A conferência vem ANTES da autenticação de propósito: assim o
+        tempo de resposta não varia conforme a senha estar certa ou
+        errada, e o bloqueio não vira um jeito de descobrir isso.
+        """
+        desde = cls._inicio_da_janela()
+
+        por_conta = cls.objects.filter(
+            identificador=identificador[:150], em__gte=desde,
+        ).count()
+        if por_conta >= TENTATIVAS_POR_CONTA:
+            return True
+
+        if origem:
+            por_origem = cls.objects.filter(
+                origem=origem, em__gte=desde,
+            ).count()
+            if por_origem >= TENTATIVAS_POR_ORIGEM:
+                return True
+
+        return False
