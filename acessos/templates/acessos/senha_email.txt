@@ -6,7 +6,7 @@ Para criar uma senha nova, abra o endereço abaixo:
 
 {{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
 
-Esta ligação vale por tempo limitado e só pode ser usada uma vez.
+Este link vale por tempo limitado e só pode ser usado uma vez.
 
 Se não foi você quem pediu, ignore esta mensagem: nada muda e a sua senha
 atual continua valendo.

@@ -57,17 +57,17 @@
 
     {% else %}
 
-        <h1 class="entrada__titulo">Ligação inválida</h1>
+        <h1 class="entrada__titulo">Link inválido</h1>
 
         <div class="cartao">
             <div class="cartao__corpo">
                 <p>
-                    Esta ligação não vale mais. Isso acontece quando ela já
+                    Este link não vale mais. Isso acontece quando ele já
                     foi usada uma vez ou quando o prazo expirou.
                 </p>
                 <div class="acoes" style="margin-top: 1.4rem;">
                     <a href="{% url 'password_reset' %}" class="botao botao--principal">
-                        Pedir uma ligação nova
+                        Pedir um link novo
                     </a>
                 </div>
             </div>

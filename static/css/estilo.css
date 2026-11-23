@@ -1178,3 +1178,50 @@ input[type="checkbox"] {
     * { transition: none !important; animation: none !important; }
     .surge, .revela { opacity: 1 !important; transform: none !important; }
 }
+
+/* ---------------------------------------------------- OLHINHO DA SENHA
+   A caixa e o botao sao criados por JavaScript (js/mostrar-senha.js).
+   Sem script, nada disto existe e o campo continua normal. */
+.campo-senha {
+    position: relative;
+    display: block;
+}
+
+/* Abre espaco para o botao, para o texto digitado nao passar por baixo. */
+.campo-senha input[type="password"],
+.campo-senha input[type="text"] {
+    padding-right: 2.9rem;
+}
+
+.campo-senha__olho {
+    position: absolute;
+    right: .45rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    border-radius: var(--raio-min);
+    color: var(--tinta-suave);
+    cursor: pointer;
+}
+
+.campo-senha__olho:hover {
+    color: var(--marca-700);
+    background-color: var(--marca-50);
+}
+
+.campo-senha__olho:focus-visible {
+    outline: 2px solid var(--marca-700);
+    outline-offset: 1px;
+}
+
+.campo-senha__olho svg {
+    width: 1.2rem;
+    height: 1.2rem;
+}

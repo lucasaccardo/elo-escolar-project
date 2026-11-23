@@ -97,6 +97,17 @@ class RecuperacaoDeSenhaTest(TestCase):
         self.assertContains(resposta, 'Esqueci minha senha')
         self.assertContains(resposta, reverse('password_reset'))
 
+    def test_a_tela_de_entrada_carrega_o_botao_de_mostrar_senha(self):
+        # O botao do olhinho e criado por JavaScript, entao o que se pode
+        # verificar aqui e que o arquivo chega a ser pedido pela pagina. O
+        # comportamento em si depende do navegador, e nao do servidor.
+        resposta = self.client.get(reverse('login'))
+
+        self.assertContains(resposta, 'js/mostrar-senha')
+        # E o campo continua sendo de senha: o script so acrescenta o
+        # botao, nao troca o tipo do campo no servidor.
+        self.assertContains(resposta, 'type="password"')
+
     def test_pedido_com_email_cadastrado_envia_a_ligacao(self):
         resposta = self.pedir('ana.souza@example.com')
 
@@ -154,7 +165,7 @@ class RecuperacaoDeSenhaTest(TestCase):
 
         segunda = self.client.get(ligacao, follow=True)
 
-        self.assertContains(segunda, 'Ligação inválida')
+        self.assertContains(segunda, 'Link inválido')
 
     def test_ligacao_adulterada_e_recusada(self):
         # Cenário de erro: token trocado na mão.
@@ -164,7 +175,7 @@ class RecuperacaoDeSenhaTest(TestCase):
             follow=True,
         )
 
-        self.assertContains(resposta, 'Ligação inválida')
+        self.assertContains(resposta, 'Link inválido')
 
     def test_senhas_diferentes_nao_trocam_nada(self):
         # Cenário de erro: confirmação divergente.
