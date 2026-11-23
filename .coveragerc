@@ -1,0 +1,28 @@
+# Configuracao da medicao de cobertura de testes.
+#
+# Versionada no repositorio para que o numero seja reproduzivel: qualquer
+# pessoa roda "coverage run manage.py test" e "coverage report" e chega ao
+# mesmo resultado, sem depender de lembrar quais pastas excluir.
+[run]
+source = .
+branch = True
+omit =
+    # Geradas pelo proprio Django, nao sao codigo escrito a mao.
+    */migrations/*
+    # Os proprios testes: medir o teste com o teste nao diz nada.
+    */tests.py
+    */test_*.py
+    # Pontos de entrada do servidor, sem logica.
+    manage.py
+    config/wsgi.py
+    config/asgi.py
+    venv/*
+
+[report]
+# Linhas que nao fazem parte do caminho executavel em producao.
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:
+    raise NotImplementedError
+show_missing = True
+skip_empty = True
