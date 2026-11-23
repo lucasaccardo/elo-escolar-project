@@ -24,10 +24,13 @@ services:
         value: "False"
       - key: WEB_CONCURRENCY
         value: "2"
+      # O banco fica FORA desta plataforma, num servico gerenciado de
+      # PostgreSQL. A razao e de sobrevivencia do dado: banco dentro do
+      # mesmo plano gratuito da aplicacao morre junto com ela - por
+      # expiracao do plano ou por suspensao da conta. Separado, republicar
+      # a aplicacao em outro lugar e so apontar para a mesma URL.
       - key: DATABASE_URL
-        fromDatabase:
-          name: elo-escolar-db
-          property: connectionString
+        sync: false
       # ALLOWED_HOSTS nao aparece aqui de proposito: o endereco do
       # servico so existe depois de o servico ser criado, e o settings.py
       # o le de RENDER_EXTERNAL_HOSTNAME, que o proprio Render preenche.
@@ -43,9 +46,3 @@ services:
         sync: false
       - key: EMAIL_REMETENTE
         sync: false
-
-databases:
-  - name: elo-escolar-db
-    plan: free
-    databaseName: elo_escolar
-    region: oregon

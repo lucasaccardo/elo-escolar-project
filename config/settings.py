@@ -28,13 +28,23 @@ DEBUG = config('DEBUG', cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost',
                        cast=Csv())
 
-# O Render publica o endereco do servico nesta variavel, que ele mesmo
-# preenche. Acrescenta-la aqui resolve um problema do ovo e da galinha: na
-# primeira publicacao o endereco ainda nao existe para ser informado a mao,
-# e sem ele na lista o Django recusaria toda requisicao com 400.
-ENDERECO_DO_SERVIDOR = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if ENDERECO_DO_SERVIDOR and ENDERECO_DO_SERVIDOR not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append(ENDERECO_DO_SERVIDOR)
+# As plataformas de publicacao informam o endereco do servico numa
+# variavel que elas mesmas preenchem, cada uma com seu nome. Le-las aqui
+# resolve um problema do ovo e da galinha: na primeira publicacao o
+# endereco ainda nao existe para ser informado a mao, e sem ele na lista o
+# Django recusaria toda requisicao com 400 - inclusive a verificacao de
+# saude que a plataforma usa para decidir se a publicacao deu certo.
+#
+# Ler as duas deixa o mesmo codigo servir nas duas plataformas, sem
+# precisar de alteracao se a publicacao mudar de lugar.
+VARIAVEIS_DE_ENDERECO = (
+    'RENDER_EXTERNAL_HOSTNAME',      # Render
+    'RAILWAY_PUBLIC_DOMAIN',         # Railway
+)
+for nome_da_variavel in VARIAVEIS_DE_ENDERECO:
+    endereco = os.environ.get(nome_da_variavel)
+    if endereco and endereco not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(endereco)
 
 # O Django exige o endereco com esquema para aceitar formulario vindo de
 # fora de localhost. Sem isto, todo POST em producao falha com 403.
