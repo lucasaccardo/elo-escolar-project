@@ -41,6 +41,15 @@ PESSOAS = [
     ('rui.campos', 'Rui', 'Campos', Perfil.Tipo.RESPONSAVEL),
 ]
 
+# Conta tecnica da demonstracao. Ela NAO tem perfil, e isso e
+# proposital: nao corresponde a nenhuma pessoa da escola e nao deve
+# aparecer como professor, coordenador ou responsavel em tela alguma. Ela
+# existe para dar acesso ao painel administrativo do Django, sem o qual
+# dois passos do roteiro de verificacao do Apendice A nao sao reproduziveis
+# - o que mostra que o relatorio excluido continua no banco, e o que
+# remove o aceite dos Termos para ver o bloqueio.
+CONTA_TECNICA = ('admin.demo', 'Administração', 'da demonstração')
+
 TURMAS = [
     ('1 ANO A', 'marcia.silva'),
     ('2 ANO B', 'marcia.silva'),
@@ -79,6 +88,7 @@ class Command(BaseCommand):
                  or f'demo-{secrets.token_urlsafe(9)}')
 
         pessoas = self._criar_pessoas(senha)
+        self._criar_conta_tecnica(senha)
         turmas = self._criar_turmas(pessoas)
         alunos = self._criar_alunos(turmas)
         self._vincular(pessoas, alunos)
@@ -90,6 +100,11 @@ class Command(BaseCommand):
         for usuario, nome, sobrenome, tipo in PESSOAS:
             rotulo = Perfil.Tipo(tipo).label
             self.stdout.write(f'  {usuario}@{DOMINIO}  —  {rotulo}')
+        usuario_tecnico = CONTA_TECNICA[0]
+        self.stdout.write('')
+        self.stdout.write(
+            f'  {usuario_tecnico}@{DOMINIO}  —  painel administrativo '
+            f'(/admin/), sem perfil no sistema')
         self.stdout.write('')
         self.stdout.write(f'  senha de todas as contas: {senha}')
         self.stdout.write('')
@@ -132,6 +147,38 @@ class Command(BaseCommand):
             if nova:
                 self.stdout.write(f'  conta criada: {usuario}')
         return pessoas
+
+    def _criar_conta_tecnica(self, senha):
+        """Conta com acesso ao painel administrativo do Django.
+
+        Recebe o aceite dos Termos como as demais: o middleware do projeto
+        cobre TODA requisicao, inclusive as do painel administrativo, entao
+        sem o aceite esta conta seria desviada para a tela de aceite ao
+        tentar abrir /admin/.
+
+        Nao recebe Perfil: perfil e o que diz de qual pessoa da escola se
+        trata, e esta conta nao e de ninguem - e ferramenta.
+        """
+        usuario, nome, sobrenome = CONTA_TECNICA
+        conta, nova = User.objects.get_or_create(
+            username=usuario,
+            defaults={
+                'email': f'{usuario}@{DOMINIO}',
+                'first_name': nome,
+                'last_name': sobrenome,
+            },
+        )
+        conta.is_staff = True
+        conta.is_superuser = True
+        conta.is_active = True
+        conta.set_password(senha)
+        conta.save()
+
+        AceiteTermos.objects.get_or_create(usuario=conta,
+                                           versao=VERSAO_TERMOS)
+        if nova:
+            self.stdout.write(f'  conta tecnica criada: {usuario}')
+        return conta
 
     def _criar_turmas(self, pessoas):
         turmas = {}
