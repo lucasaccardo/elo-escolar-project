@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 import dj_database_url
@@ -26,6 +27,14 @@ DEBUG = config('DEBUG', cast=bool)
 # sirva na maquina de desenvolvimento e no servidor.
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost',
                        cast=Csv())
+
+# O Render publica o endereco do servico nesta variavel, que ele mesmo
+# preenche. Acrescenta-la aqui resolve um problema do ovo e da galinha: na
+# primeira publicacao o endereco ainda nao existe para ser informado a mao,
+# e sem ele na lista o Django recusaria toda requisicao com 400.
+ENDERECO_DO_SERVIDOR = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if ENDERECO_DO_SERVIDOR and ENDERECO_DO_SERVIDOR not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(ENDERECO_DO_SERVIDOR)
 
 # O Django exige o endereco com esquema para aceitar formulario vindo de
 # fora de localhost. Sem isto, todo POST em producao falha com 403.

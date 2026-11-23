@@ -28,9 +28,16 @@ services:
         fromDatabase:
           name: elo-escolar-db
           property: connectionString
-      # Preenchidas a mao no painel, por serem segredo de servico externo:
-      #   ALLOWED_HOSTS, BREVO_API_KEY, EMAIL_REMETENTE
-      - key: ALLOWED_HOSTS
+      # ALLOWED_HOSTS nao aparece aqui de proposito: o endereco do
+      # servico so existe depois de o servico ser criado, e o settings.py
+      # o le de RENDER_EXTERNAL_HOSTNAME, que o proprio Render preenche.
+      #
+      # Povoa o banco com os dados de demonstracao a cada publicacao. O
+      # comando e idempotente: rodar de novo nao duplica nada.
+      - key: CRIAR_DEMO
+        value: "1"
+      # Informadas a mao no painel, por serem segredo:
+      - key: DEMO_SENHA
         sync: false
       - key: BREVO_API_KEY
         sync: false
