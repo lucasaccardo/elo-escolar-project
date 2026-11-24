@@ -1,3 +1,11 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Tela do painel de indicadores. So monta o que os
+#                      servicos apuram.
+#   REQUISITOS.......: RF12
+#   PROCURE POR......: painel, dashboard, json_script, grafico
+# ----------------------------------------------------------------------
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 

@@ -1,3 +1,11 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Enderecos das telas de cadastro, confirmacao e
+#                      aprovacao.
+#   REQUISITOS.......: RF02, RF03, RF14
+#   PROCURE POR......: rota, endereco, cadastro, confirmar, pedidos
+# ----------------------------------------------------------------------
+
 from django.urls import path
 
 from . import views

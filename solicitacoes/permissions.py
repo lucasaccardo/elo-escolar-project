@@ -4,6 +4,18 @@ Mesmo desenho do resto do sistema: a view pergunta, este arquivo decide, e o
 padrão é NEGAR. As listas dizem quem PODE; quem não está nelas, não pode.
 """
 
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Quem abre, quem responde e quem encerra
+#                      solicitacao. Aqui aparece a permissao de OBJETO:
+#                      nao basta poder agir, tem de poder agir sobre
+#                      aquele registro.
+#   REQUISITOS.......: RF10
+#   PROCURE POR......: permissao de objeto, autorizacao,
+#                      pode_abrir_solicitacao, pode_responder,
+#                      pode_encerrar, foro particular
+# ----------------------------------------------------------------------
+
 from relatorios.models import Perfil
 from relatorios.permissions import (
     eh_responsavel,

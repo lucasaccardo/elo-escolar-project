@@ -1,3 +1,14 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Quem pode analisar pedido de acesso e quem ja
+#                      aceitou os Termos. A tela pergunta, este arquivo
+#                      decide.
+#   REQUISITOS.......: RF03, RF08
+#   PROCURE POR......: permissao, autorizacao, negar por padrao,
+#                      pode_aprovar_acessos, aceitou_termos,
+#                      solicitacoes_que_pode_analisar
+# ----------------------------------------------------------------------
+
 from relatorios.models import Perfil
 from relatorios.permissions import obter_perfil, turmas_visiveis
 

@@ -1,3 +1,10 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Telas do mural: listar e publicar recado.
+#   REQUISITOS.......: RF09
+#   PROCURE POR......: lista_recados, publicar_recado, 403
+# ----------------------------------------------------------------------
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render

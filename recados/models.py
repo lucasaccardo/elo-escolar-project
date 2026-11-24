@@ -1,3 +1,12 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Tabela do mural de recados, com turma opcional e
+#                      periodo de exibicao.
+#   REQUISITOS.......: RF09
+#   PROCURE POR......: Recado, turma nula, recado institucional,
+#                      exibir_ate, periodo
+# ----------------------------------------------------------------------
+
 from datetime import date
 
 from django.conf import settings

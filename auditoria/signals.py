@@ -1,3 +1,13 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Liga os avisos de entrada e de erro de entrada
+#                      do Django ao log de auditoria, sem precisar
+#                      alterar a tela de login.
+#   REQUISITOS.......: RF07, RF01
+#   PROCURE POR......: signals, user_logged_in, user_login_failed,
+#                      LOGIN, LOGIN_FALHA
+# ----------------------------------------------------------------------
+
 from django.contrib.auth.signals import user_logged_in, user_login_failed
 from django.dispatch import receiver
 

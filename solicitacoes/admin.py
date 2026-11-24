@@ -1,3 +1,11 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Como as solicitacoes aparecem no painel
+#                      administrativo.
+#   REQUISITOS.......: RF10
+#   PROCURE POR......: admin, list_display, situacao
+# ----------------------------------------------------------------------
+
 from django.contrib import admin
 
 from .models import Solicitacao

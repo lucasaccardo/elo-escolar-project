@@ -1,3 +1,11 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Informacoes que toda tela precisa, como o perfil
+#                      de quem esta conectado e os contadores do menu.
+#   REQUISITOS.......: RF06
+#   PROCURE POR......: context processor, menu, perfil, contador
+# ----------------------------------------------------------------------
+
 from recados.permissions import pode_publicar_recado
 from solicitacoes.permissions import (
     pode_abrir_solicitacao,

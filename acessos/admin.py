@@ -1,3 +1,11 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Como os pedidos de acesso e os aceites aparecem
+#                      no painel administrativo do Django.
+#   REQUISITOS.......: RF03, RF08
+#   PROCURE POR......: admin, painel administrativo, list_display
+# ----------------------------------------------------------------------
+
 from django.contrib import admin
 
 from .models import AceiteTermos, SolicitacaoAcesso

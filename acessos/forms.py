@@ -1,3 +1,14 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Formularios do cadastro e da entrada, com a
+#                      validacao de cada campo e o limite de tentativas
+#                      de login.
+#   REQUISITOS.......: RF01, RF02, RF14
+#   PROCURE POR......: CadastroResponsavelForm, LoginForm, CodigoForm,
+#                      clean, RGM, bloqueado, origem_da_requisicao,
+#                      validacao
+# ----------------------------------------------------------------------
+
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm

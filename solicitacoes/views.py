@@ -1,3 +1,12 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Telas das solicitacoes: listar, abrir, responder
+#                      e encerrar.
+#   REQUISITOS.......: RF10
+#   PROCURE POR......: lista, abrir, responder, encerrar, require_POST,
+#                      aviso por e-mail
+# ----------------------------------------------------------------------
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied

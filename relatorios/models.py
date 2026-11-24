@@ -1,3 +1,12 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Tabelas do dominio escolar: turma, aluno, perfil
+#                      de usuario e relatorio diario.
+#   REQUISITOS.......: RF05, RF06, RF11
+#   PROCURE POR......: Turma, Aluno, Perfil, RelatorioDiario, excluido,
+#                      exclusao logica, editado_em
+# ----------------------------------------------------------------------
+
 from django.db import models
 from django.conf import settings
 

@@ -1,3 +1,12 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Tabela de enderecos do sistema: diz qual
+#                      endereco chama qual tela.
+#   REQUISITOS.......: RF01, RF13
+#   PROCURE POR......: urlpatterns, rota, endereco, login,
+#                      password_reset, include
+# ----------------------------------------------------------------------
+
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path, include

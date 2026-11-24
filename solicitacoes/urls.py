@@ -1,3 +1,10 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Enderecos das telas de solicitacao.
+#   REQUISITOS.......: RF10
+#   PROCURE POR......: rota, endereco, solicitacoes
+# ----------------------------------------------------------------------
+
 from django.urls import path
 
 from . import views

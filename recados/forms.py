@@ -1,3 +1,12 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Formulario do recado, que recusa no servidor o
+#                      recado geral de quem nao pode publica-lo.
+#   REQUISITOS.......: RF09
+#   PROCURE POR......: RecadoForm, clean_turma, validacao, regra no
+#                      servidor
+# ----------------------------------------------------------------------
+
 from django import forms
 
 from .models import Recado

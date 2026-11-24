@@ -12,6 +12,16 @@ mensagem que o Django resolva enviar — inclusive a de recuperação de senha �
 sai pelo mesmo caminho dos avisos de aprovação e de resposta de solicitação.
 """
 
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Encaixa a API de e-mail no lugar do SMTP, para
+#                      que tudo que o Django envie saia pelo mesmo
+#                      caminho.
+#   REQUISITOS.......: RF13
+#   PROCURE POR......: backend de e-mail, BrevoEmailBackend,
+#                      send_messages, SMTP
+# ----------------------------------------------------------------------
+
 from django.core.mail.backends.base import BaseEmailBackend
 
 from .notificacoes import enviar_email

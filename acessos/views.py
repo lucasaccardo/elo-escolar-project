@@ -1,3 +1,13 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Telas do cadastro do responsavel, da confirmacao
+#                      de e-mail, do aceite dos Termos e da fila de
+#                      aprovacao da escola.
+#   REQUISITOS.......: RF02, RF03, RF04, RF08, RF14
+#   PROCURE POR......: cadastro, confirmar_email, aprovar, recusar,
+#                      fila_aprovacao, transaction.atomic, require_POST
+# ----------------------------------------------------------------------
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required

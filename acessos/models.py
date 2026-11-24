@@ -1,3 +1,14 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Tabelas do cadastro e do acesso: pedido de
+#                      acesso, aceite dos Termos, codigo de confirmacao
+#                      de e-mail e tentativas de entrada.
+#   REQUISITOS.......: RF02, RF03, RF08, RF14
+#   PROCURE POR......: SolicitacaoAcesso, AceiteTermos,
+#                      ConfirmacaoEmail, TentativaDeLogin,
+#                      VERSAO_TERMOS, bloqueio, codigo, hash
+# ----------------------------------------------------------------------
+
 import secrets
 from datetime import timedelta
 

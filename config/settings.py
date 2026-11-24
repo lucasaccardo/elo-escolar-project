@@ -10,6 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Configuracao do projeto inteiro: aplicativos,
+#                      banco, seguranca, arquivos estaticos e e-mail.
+#   REQUISITOS.......: RNF01, RNF04, RNF08
+#   PROCURE POR......: ALLOWED_HOSTS, DATABASE_URL, HTTPS, HSTS,
+#                      MAILERS, STORAGES, SECRET_KEY, MIDDLEWARE
+# ----------------------------------------------------------------------
+
 import os
 from pathlib import Path
 
