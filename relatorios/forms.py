@@ -1,3 +1,12 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Formulario do relatorio diario, com os campos
+#                      obrigatorios e os opcionais.
+#   REQUISITOS.......: RF05
+#   PROCURE POR......: RelatorioForm, validacao, conteudo obrigatorio,
+#                      tarefa
+# ----------------------------------------------------------------------
+
 from django import forms
 from .models import RelatorioDiario
 

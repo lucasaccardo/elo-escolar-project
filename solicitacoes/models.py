@@ -1,3 +1,12 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Tabela das solicitacoes da familia para a
+#                      escola, com tipo, situacao e resposta.
+#   REQUISITOS.......: RF10
+#   PROCURE POR......: Solicitacao, tipo, situacao, aberta, respondida,
+#                      encerrada, responder, encerrar, mao dupla
+# ----------------------------------------------------------------------
+
 from django.conf import settings
 from django.db import models
 from django.utils import timezone

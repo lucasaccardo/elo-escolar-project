@@ -1,3 +1,12 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Tabela do log de auditoria: cada acao relevante
+#                      com autor, data e hora.
+#   REQUISITOS.......: RF07
+#   PROCURE POR......: Evento, Acao, auditoria, log, usuario_informado,
+#                      SET_NULL, LOGIN_BLOQUEADO
+# ----------------------------------------------------------------------
+
 from django.conf import settings
 from django.db import models
 

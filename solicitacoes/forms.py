@@ -1,3 +1,12 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Formulario da solicitacao, que limita a escolha
+#                      aos alunos do proprio responsavel.
+#   REQUISITOS.......: RF10
+#   PROCURE POR......: SolicitacaoForm, queryset, validacao, alunos do
+#                      responsavel
+# ----------------------------------------------------------------------
+
 from django import forms
 
 from .models import Solicitacao

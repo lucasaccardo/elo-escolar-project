@@ -5,6 +5,17 @@ padrao e NEGAR. As listas abaixo dizem quem PODE; quem nao esta nelas, nao
 pode, e nao existe lista de quem nao pode.
 """
 
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Quem publica recado de turma e quem publica
+#                      recado da escola inteira, e quais recados cada
+#                      perfil enxerga.
+#   REQUISITOS.......: RF09
+#   PROCURE POR......: permissao, autorizacao, negar por padrao,
+#                      recados_visiveis, pode_publicar_recado_geral,
+#                      periodo de exibicao
+# ----------------------------------------------------------------------
+
 from datetime import date
 
 from django.db.models import Q

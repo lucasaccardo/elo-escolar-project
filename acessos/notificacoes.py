@@ -1,3 +1,12 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Chamada a API externa de e-mail. Unica
+#                      integracao externa do sistema.
+#   REQUISITOS.......: RF04
+#   PROCURE POR......: API externa, Brevo, enviar_email, integracao,
+#                      HTTP, variavel de ambiente
+# ----------------------------------------------------------------------
+
 import json
 import urllib.error
 import urllib.request

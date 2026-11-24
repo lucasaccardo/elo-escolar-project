@@ -1,3 +1,11 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Tela de consulta do log de auditoria, somente
+#                      leitura.
+#   REQUISITOS.......: RF07
+#   PROCURE POR......: admin, log, somente leitura, has_add_permission
+# ----------------------------------------------------------------------
+
 from django.contrib import admin
 
 from .models import Evento

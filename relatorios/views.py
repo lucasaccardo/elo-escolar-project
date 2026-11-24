@@ -1,3 +1,12 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Telas do diario de turma: listar, publicar,
+#                      corrigir e excluir relatorio.
+#   REQUISITOS.......: RF05, RF06, RF11
+#   PROCURE POR......: lista_relatorios, publicar, editar, excluir,
+#                      select_related, require_POST, 403, 404
+# ----------------------------------------------------------------------
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render

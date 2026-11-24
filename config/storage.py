@@ -17,6 +17,16 @@ resumo no nome, a compactação e a reescrita das referências que de fato
 existem.
 """
 
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Como os arquivos estaticos sao servidos em
+#                      producao, com resumo do conteudo no nome de cada
+#                      arquivo.
+#   REQUISITOS.......: RNF08
+#   PROCURE POR......: estaticos, cache, manifesto, WhiteNoise,
+#                      sourceMappingURL
+# ----------------------------------------------------------------------
+
 import re
 
 from whitenoise.storage import CompressedManifestStaticFilesStorage

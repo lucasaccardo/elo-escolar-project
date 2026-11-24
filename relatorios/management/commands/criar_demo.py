@@ -13,6 +13,16 @@ arquivo pode ficar no repositório, que é público, sem carregar segredo algum.
 O comando é idempotente: rodar duas vezes não duplica nada.
 """
 
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Comando que povoa o banco com os dados de
+#                      demonstracao. A senha vem do ambiente, nunca do
+#                      codigo.
+#   REQUISITOS.......: -
+#   PROCURE POR......: criar_demo, dados de demonstracao, DEMO_SENHA,
+#                      seed, idempotente
+# ----------------------------------------------------------------------
+
 import os
 import secrets
 from datetime import timedelta

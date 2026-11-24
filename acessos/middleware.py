@@ -1,3 +1,13 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Barreira que roda em TODA requisicao e exige o
+#                      aceite da versao vigente dos Termos antes de
+#                      abrir qualquer tela protegida.
+#   REQUISITOS.......: RF08
+#   PROCURE POR......: middleware, LGPD, termos, aceite, process_view,
+#                      tela protegida
+# ----------------------------------------------------------------------
+
 from django.shortcuts import redirect
 from django.urls import reverse
 

@@ -10,6 +10,15 @@ log de auditoria, de modo que o pedido e a troca efetiva fiquem rastreáveis,
 como toda ação relevante do sistema.
 """
 
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Telas de recuperacao de senha, com registro na
+#                      auditoria.
+#   REQUISITOS.......: RF13
+#   PROCURE POR......: recuperar senha, redefinir, token, uso unico,
+#                      PasswordReset
+# ----------------------------------------------------------------------
+
 from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
 

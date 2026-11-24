@@ -1,3 +1,11 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: A unica funcao que grava no log. Uma informacao,
+#                      um lugar.
+#   REQUISITOS.......: RF07
+#   PROCURE POR......: registrar, auditoria, log, nunca senha
+# ----------------------------------------------------------------------
+
 from .models import Evento
 
 

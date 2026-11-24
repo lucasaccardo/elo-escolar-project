@@ -1,3 +1,15 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: O coracao da autorizacao: quais turmas cada
+#                      perfil enxerga e quem pode publicar, corrigir e
+#                      excluir relatorio.
+#   REQUISITOS.......: RF05, RF06, RF11
+#   PROCURE POR......: permissao, autorizacao, negar por padrao,
+#                      turmas_visiveis, pode_publicar_relatorio,
+#                      pode_editar_relatorio, pode_excluir_relatorio,
+#                      visibilidade
+# ----------------------------------------------------------------------
+
 from .models import Perfil, Turma  # Traz Perfil e Turma do models.py
 
 

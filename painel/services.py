@@ -9,6 +9,17 @@ Separar assim tem um motivo pratico: da para testar cada conta isoladamente,
 sem abrir tela nenhuma.
 """
 
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Apuracao dos numeros e graficos do painel,
+#                      separada da tela. Reaproveita as mesmas funcoes
+#                      de visibilidade das demais telas.
+#   REQUISITOS.......: RF12
+#   PROCURE POR......: indicadores, graficos, big numbers,
+#                      relatorios_por_turma, relatorios_por_semana,
+#                      visibilidade
+# ----------------------------------------------------------------------
+
 from datetime import date, timedelta
 
 from django.db.models import Count, Q

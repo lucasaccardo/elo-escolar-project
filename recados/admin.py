@@ -1,3 +1,11 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Como os recados aparecem no painel
+#                      administrativo.
+#   REQUISITOS.......: RF09
+#   PROCURE POR......: admin, list_display
+# ----------------------------------------------------------------------
+
 from django.contrib import admin
 
 from .models import Recado

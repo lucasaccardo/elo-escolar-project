@@ -1,3 +1,11 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Como turmas, alunos, perfis e relatorios
+#                      aparecem no painel administrativo.
+#   REQUISITOS.......: RF11
+#   PROCURE POR......: admin, excluido, exclusao logica, list_filter
+# ----------------------------------------------------------------------
+
 from django.contrib import admin
 from .models import Turma, RelatorioDiario, Aluno, Perfil
 

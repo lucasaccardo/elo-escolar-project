@@ -1,3 +1,11 @@
+# ----------------------------------------------------------------------
+# MAPA DO CODIGO
+#   O QUE FAZ........: Enderecos das telas de relatorio.
+#   REQUISITOS.......: RF05, RF06, RF11
+#   PROCURE POR......: rota, endereco, relatorios, novo, editar,
+#                      excluir
+# ----------------------------------------------------------------------
+
 from django.urls import path
 from . import views
 
