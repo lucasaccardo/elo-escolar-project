@@ -6,6 +6,7 @@
 #   PROCURE POR......: context processor, menu, perfil, contador
 # ----------------------------------------------------------------------
 
+from auditoria.permissions import pode_consultar_log
 from recados.permissions import pode_publicar_recado
 from solicitacoes.permissions import (
     pode_abrir_solicitacao,
@@ -36,6 +37,7 @@ def menu_acessos(request):
             or pode_responder_solicitacoes(usuario)
         ),
         'mostrar_pedidos': pode_aprovar_acessos(usuario),
+        'mostrar_log': pode_consultar_log(usuario),
         'pedidos_pendentes': 0,
     }
 

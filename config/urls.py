@@ -54,5 +54,6 @@ urlpatterns = [
     path('recados/', include('recados.urls')),
     path('painel/', include('painel.urls')),
     path('solicitacoes/', include('solicitacoes.urls')),
+    path('auditoria/', include('auditoria.urls')),
     path('', include('relatorios.urls')),
 ]

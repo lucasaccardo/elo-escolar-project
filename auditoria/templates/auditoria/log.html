@@ -1,0 +1,129 @@
+{% extends 'relatorios/base.html' %}
+
+{% block titulo %}Log de auditoria - Elo Escolar{% endblock %}
+
+{% block conteudo %}
+
+<div class="cabecalho-pagina">
+    <div>
+        <h1>Log de auditoria</h1>
+        <p>
+            Cada ação relevante do sistema, com autor, data e hora.
+            O registro é somente leitura: não se escreve, não se corrige
+            e não se apaga.
+        </p>
+    </div>
+</div>
+
+<div class="cartao">
+    <div class="cartao__corpo">
+        <form method="get" class="filtro-log">
+
+            <div class="campo">
+                <label for="acao">Tipo de ação</label>
+                <select name="acao" id="acao" class="form-select">
+                    <option value="">Todas as ações</option>
+                    {% for valor, rotulo in acoes %}
+                        <option value="{{ valor }}"
+                                {% if valor == acao_escolhida %}selected{% endif %}>
+                            {{ rotulo }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="q">Pessoa</label>
+                <input type="text" name="q" id="q" class="form-control"
+                       value="{{ procura }}" placeholder="nome ou e-mail">
+            </div>
+
+            <div class="filtro-log__acoes">
+                <button type="submit" class="botao botao--principal">Filtrar</button>
+                {% if acao_escolhida or procura %}
+                    <a href="{% url 'log_auditoria' %}" class="botao botao--claro">Limpar</a>
+                {% endif %}
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% if pagina.object_list %}
+
+    <p class="texto-pequeno texto-suave" style="margin: 1rem 0 .6rem;">
+        {{ total }} evento{{ total|pluralize }} encontrado{{ total|pluralize }}
+        · página {{ pagina.number }} de {{ pagina.paginator.num_pages }}
+    </p>
+
+    <div class="cartao">
+        <div class="tabela-rolagem">
+            <table class="tabela">
+                <thead>
+                    <tr>
+                        <th>Quando</th>
+                        <th>Ação</th>
+                        <th>Quem</th>
+                        <th>Detalhe</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for evento in pagina.object_list %}
+                        <tr>
+                            <td class="tabela__quando">
+                                {{ evento.quando|date:"d/m/Y" }}<br>
+                                <span class="texto-suave">{{ evento.quando|date:"H:i" }}</span>
+                            </td>
+                            <td>{{ evento.get_acao_display }}</td>
+                            <td>
+                                {% if evento.usuario %}
+                                    {{ evento.usuario.get_full_name|default:evento.usuario.username }}
+                                    <br>
+                                    <span class="texto-pequeno texto-suave">{{ evento.usuario.username }}</span>
+                                {% elif evento.usuario_informado %}
+                                    <span class="texto-suave">{{ evento.usuario_informado }}</span>
+                                    <br>
+                                    <span class="texto-pequeno texto-suave">sem conta no sistema</span>
+                                {% else %}
+                                    <span class="texto-suave">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="texto-pequeno">{{ evento.detalhe|default:"—" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if pagina.paginator.num_pages > 1 %}
+        <div class="paginacao">
+            {% if pagina.has_previous %}
+                <a class="botao botao--claro"
+                   href="?pagina={{ pagina.previous_page_number }}{% if acao_escolhida %}&acao={{ acao_escolhida }}{% endif %}{% if procura %}&q={{ procura }}{% endif %}">
+                    Anterior
+                </a>
+            {% endif %}
+            {% if pagina.has_next %}
+                <a class="botao botao--claro"
+                   href="?pagina={{ pagina.next_page_number }}{% if acao_escolhida %}&acao={{ acao_escolhida }}{% endif %}{% if procura %}&q={{ procura }}{% endif %}">
+                    Próxima
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+{% else %}
+
+    <div class="vazio">
+        <strong>Nenhum evento encontrado</strong>
+        {% if acao_escolhida or procura %}
+            Nenhum registro corresponde ao filtro escolhido.
+        {% else %}
+            Assim que alguém usar o sistema, as ações aparecem aqui.
+        {% endif %}
+    </div>
+
+{% endif %}
+
+{% endblock %}
