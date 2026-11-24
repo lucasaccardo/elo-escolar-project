@@ -1225,3 +1225,50 @@ input[type="checkbox"] {
     width: 1.2rem;
     height: 1.2rem;
 }
+
+/* ------------------------------------------------- TABELA DO LOG
+   Usada na tela de auditoria. Em tela pequena a tabela rola na
+   horizontal em vez de espremer as colunas ate a ilegibilidade. */
+.filtro-log {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.filtro-log .campo { margin-bottom: 0; flex: 1 1 220px; }
+.filtro-log__acoes { display: flex; gap: .6rem; }
+
+.tabela-rolagem { overflow-x: auto; }
+
+.tabela {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .92rem;
+}
+
+.tabela th,
+.tabela td {
+    padding: .7rem .9rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid #E6EDEC;
+}
+
+.tabela thead th {
+    background-color: var(--marca-50);
+    color: var(--marca-900);
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.tabela tbody tr:last-child td { border-bottom: 0; }
+.tabela tbody tr:hover { background-color: #F7FBFA; }
+.tabela__quando { white-space: nowrap; }
+
+.paginacao {
+    display: flex;
+    gap: .6rem;
+    justify-content: center;
+    margin-top: 1.2rem;
+}

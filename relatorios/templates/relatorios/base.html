@@ -110,8 +110,9 @@
                 </a>
             {% endif %}
 
-            {% if user.is_staff %}
-                <a class="nav__item" href="{% url 'admin:auditoria_evento_changelist' %}">
+            {% if mostrar_log %}
+                <a class="nav__item {% if request.resolver_match.url_name == 'log_auditoria' %}nav__item--ativo{% endif %}"
+                   href="{% url 'log_auditoria' %}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                          stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="9"/>
